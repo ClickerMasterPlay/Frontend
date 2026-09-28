@@ -1,0 +1,165 @@
+.title-screen {
+  position: relative;
+  min-height: 100%;
+  overflow: hidden;
+}
+
+.logo__title {
+  max-width: 100%;
+}
+
+.title-screen__dirt,
+.title-screen__shade {
+  position: absolute;
+  inset: 0;
+}
+
+.title-screen__dirt {
+  background-color: #4a3016;
+  background-image: url("/dirt.svg");
+  background-repeat: repeat;
+  background-size: 64px 64px;
+  image-rendering: pixelated;
+}
+
+.title-screen__shade {
+  background: rgba(8, 5, 2, 0.32);
+}
+
+.title-screen__content {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 48px 16px 64px;
+}
+
+.logo {
+  position: relative;
+  margin: 0 0 56px;
+  text-align: center;
+}
+
+.logo__title {
+  margin: 0;
+}
+
+.logo__line {
+  display: block;
+  font-family: "Rubik Mono One", Tiny5, sans-serif;
+  font-size: clamp(52px, 11vw, 92px);
+  font-weight: 400;
+  line-height: 0.86;
+  letter-spacing: 0.06em;
+  color: #e6d34a;
+  text-shadow:
+    3px 0 0 #1b2a08,
+    -3px 0 0 #1b2a08,
+    0 3px 0 #1b2a08,
+    0 -3px 0 #1b2a08,
+    4px 4px 0 #2f4710,
+    8px 8px 0 #1c2c0a;
+}
+
+.logo__line--big {
+  font-size: clamp(64px, 14vw, 118px);
+}
+
+.logo__splash {
+  position: absolute;
+  right: -4%;
+  bottom: -10px;
+  margin: 0;
+  color: #ffff00;
+  font-size: clamp(16px, 2.2vw, 22px);
+  line-height: 1;
+  white-space: nowrap;
+  text-shadow: 2px 2px 0 #3f3f00;
+  transform: rotate(-20deg);
+  animation: splash-wobble 0.35s ease-in-out infinite;
+}
+
+.menu {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: min(400px, 92vw);
+}
+
+.menu__row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.title-screen__bar {
+  position: absolute;
+  z-index: 1;
+  right: 10px;
+  bottom: 8px;
+  left: 10px;
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  color: #fff;
+  font-size: 14px;
+  text-shadow: 2px 2px 0 #111;
+  pointer-events: none;
+}
+
+@keyframes splash-wobble {
+  0% {
+    transform: rotate(-22deg) scale(1);
+  }
+  50% {
+    transform: rotate(-22deg) scale(1.12);
+  }
+  100% {
+    transform: rotate(-22deg) scale(1);
+  }
+}
+
+@media (max-width: 640px) {
+  .logo {
+    margin-bottom: 36px;
+  }
+
+  .logo__line {
+    font-size: clamp(24px, 11vw, 40px);
+    letter-spacing: 0.01em;
+  }
+
+  .logo__line--big {
+    font-size: clamp(28px, 12.5vw, 46px);
+  }
+
+  .logo__splash {
+    position: static;
+    display: block;
+    margin: 18px auto 0;
+    transform: rotate(-8deg);
+    animation: splash-wobble-mobile 0.35s ease-in-out infinite;
+  }
+
+  .title-screen__bar {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2px;
+    font-size: 12px;
+  }
+}
+
+@keyframes splash-wobble-mobile {
+  0% {
+    transform: rotate(-8deg) scale(1);
+  }
+  50% {
+    transform: rotate(-8deg) scale(1.08);
+  }
+  100% {
+    transform: rotate(-8deg) scale(1);
+  }
+}

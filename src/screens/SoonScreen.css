@@ -1,0 +1,26 @@
+.soon {
+  gap: 16px;
+  text-align: center;
+}
+
+.soon__label {
+  margin: 0;
+  font-family: "Rubik Mono One", Tiny5, sans-serif;
+  font-size: clamp(28px, 6vw, 42px);
+  color: #ffffa0;
+  text-shadow: 3px 3px 0 #3f3f00;
+}
+
+.soon__text {
+  margin: 0 0 12px;
+  max-width: 360px;
+  color: #f2f2f2;
+  font-size: 22px;
+  line-height: 1.45;
+  word-spacing: 0.35em;
+  text-shadow: 2px 2px 0 #111;
+}
+
+.soon__actions {
+  width: min(400px, 92vw);
+}
