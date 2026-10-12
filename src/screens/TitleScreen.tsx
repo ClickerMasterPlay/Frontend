@@ -1,27 +1,42 @@
 import { useMemo } from "react";
 import { McButton } from "../components/McButton";
+import { useSettings } from "../settings/SettingsContext";
 import "./TitleScreen.css";
 
-const SPLASHES = [
-  "Копай глубже!",
-  "Кирки нет!",
-  "Гость копает!",
-  "Осторожно, гравий!",
-  "С верстака!",
-  "Кликай чаще!",
-  "Дерево руками!",
-  "Не стой под песком!",
-];
+const SPLASHES = {
+  ru: [
+    "Копай глубже!",
+    "Кирки нет!",
+    "Гость копает!",
+    "Осторожно, гравий!",
+    "С верстака!",
+    "Кликай чаще!",
+    "Дерево руками!",
+    "Не стой под песком!",
+  ],
+  en: [
+    "Dig deeper!",
+    "No pickaxe included!",
+    "Guests dig too!",
+    "Watch the gravel!",
+    "Fresh from the bench!",
+    "Click more!",
+    "Punch the tree!",
+    "Don't stand under sand!",
+  ],
+};
 
 type TitleScreenProps = {
   onStart: () => void;
+  onSettings: () => void;
 };
 
-export function TitleScreen({ onStart }: TitleScreenProps) {
-  const splash = useMemo(
-    () => SPLASHES[Math.floor(Math.random() * SPLASHES.length)],
-    [],
-  );
+export function TitleScreen({ onStart, onSettings }: TitleScreenProps) {
+  const { t, settings } = useSettings();
+  const splash = useMemo(() => {
+    const list = SPLASHES[settings.language];
+    return list[Math.floor(Math.random() * list.length)];
+  }, [settings.language]);
 
   return (
     <div className="title-screen">
@@ -31,26 +46,28 @@ export function TitleScreen({ onStart }: TitleScreenProps) {
       <div className="title-screen__content">
         <header className="logo">
           <h1 className="logo__title">
-            <span className="logo__line">КРАФТ</span>
-            <span className="logo__line logo__line--big">КЛИКЕР</span>
+            <span className="logo__line">{settings.language === "en" ? "CRAFT" : "КРАФТ"}</span>
+            <span className="logo__line logo__line--big">
+              {settings.language === "en" ? "CLICKER" : "КЛИКЕР"}
+            </span>
           </h1>
           <p className="logo__splash">{splash}</p>
         </header>
 
-        <nav className="menu" aria-label="Главное меню">
+        <nav className="menu" aria-label={t("start")}>
           <McButton wide onClick={onStart}>
-            Начать игру
+            {t("start")}
           </McButton>
           <div className="menu__row">
-            <McButton disabled>Настройки</McButton>
-            <McButton disabled>Выход</McButton>
+            <McButton onClick={onSettings}>{t("settings")}</McButton>
+            <McButton disabled>{t("quit")}</McButton>
           </div>
         </nav>
       </div>
 
       <footer className="title-screen__bar">
-        <span>Крафт кликер 0.1.0</span>
-        <span>Учебный проект. Не связано с Mojang.</span>
+        <span>{t("version")}</span>
+        <span>{t("disclaimer")}</span>
       </footer>
     </div>
   );

@@ -1,0 +1,15 @@
+:root {
+  --ink: #3d2a12;
+  --ink-soft: #6a4b24;
+  --paper: #f4e2b0;
+  --paper-2: #ead28f;
+  --gold: #e8b423;
+  --gold-2: #c99212;
+  --gold-hi: #f6d56a;
+  --line: #b8892a;
+  --forest: #0c1610;
+  --forest-2: #16301e;
+  --leaf: #1f4a2c;
+  --radius: 8px;
+  --radius-sm: 6px;
+}

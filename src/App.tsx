@@ -1,15 +1,76 @@
 import { useState } from "react";
-import { SoonScreen } from "./screens/SoonScreen";
+import { GameMusic } from "./audio/GameMusic";
+import { GameScreen } from "./screens/GameScreen";
+import { ProfileScreen } from "./screens/ProfileScreen";
+import { SettingsScreen } from "./screens/SettingsScreen";
 import { TitleScreen } from "./screens/TitleScreen";
+import { SettingsProvider } from "./settings/SettingsContext";
+import { WalletProvider } from "./wallet/WalletContext";
+
+type Screen = "title" | "game" | "settings" | "profile";
+
+function screenFromHash(): Screen {
+  const hash = window.location.hash.replace("#", "");
+  if (hash === "game" || hash === "settings" || hash === "profile") {
+    return hash;
+  }
+  if (
+    hash === "inventory" ||
+    hash === "rating" ||
+    hash === "shop" ||
+    hash === "quests"
+  ) {
+    return "game";
+  }
+  return "title";
+}
+
+function AppScreens() {
+  const [screen, setScreen] = useState<Screen>(screenFromHash);
+  const [settingsFrom, setSettingsFrom] = useState<Screen>("title");
+
+  const inGame =
+    screen === "game" ||
+    screen === "profile" ||
+    (screen === "settings" && settingsFrom !== "title");
+
+  const openSettings = (from: Screen) => {
+    setSettingsFrom(from);
+    setScreen("settings");
+  };
+
+  return (
+    <>
+      <GameMusic playing={inGame} />
+      {screen === "settings" ? (
+        <SettingsScreen
+          fromGame={settingsFrom === "game" || settingsFrom === "profile"}
+          onBack={() => setScreen(settingsFrom)}
+          onToMenu={() => setScreen("title")}
+        />
+      ) : screen === "profile" ? (
+        <ProfileScreen onBack={() => setScreen("game")} />
+      ) : screen === "game" ? (
+        <GameScreen
+          onSettings={() => openSettings("game")}
+          onProfile={() => setScreen("profile")}
+        />
+      ) : (
+        <TitleScreen
+          onStart={() => setScreen("game")}
+          onSettings={() => openSettings("title")}
+        />
+      )}
+    </>
+  );
+}
 
 export default function App() {
-  const [screen, setScreen] = useState<"title" | "soon">(() =>
-    window.location.hash === "#soon" ? "soon" : "title",
+  return (
+    <SettingsProvider>
+      <WalletProvider>
+        <AppScreens />
+      </WalletProvider>
+    </SettingsProvider>
   );
-
-  if (screen === "soon") {
-    return <SoonScreen onBack={() => setScreen("title")} />;
-  }
-
-  return <TitleScreen onStart={() => setScreen("soon")} />;
 }

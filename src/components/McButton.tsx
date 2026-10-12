@@ -4,6 +4,8 @@ type McButtonProps = {
   children: string;
   disabled?: boolean;
   wide?: boolean;
+  slim?: boolean;
+  active?: boolean;
   onClick?: () => void;
 };
 
@@ -11,12 +13,16 @@ export function McButton({
   children,
   disabled = false,
   wide = false,
+  slim = false,
+  active = false,
   onClick,
 }: McButtonProps) {
   const className = [
     "mc-btn",
     wide ? "mc-btn--wide" : "",
+    slim ? "mc-btn--slim" : "",
     disabled ? "mc-btn--off" : "",
+    active ? "mc-btn--on" : "",
   ]
     .filter(Boolean)
     .join(" ");

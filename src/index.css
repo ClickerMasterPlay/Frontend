@@ -1,3 +1,5 @@
+@import "./theme.css";
+
 * {
   box-sizing: border-box;
 }
@@ -11,9 +13,9 @@ body,
 }
 
 body {
-  font-family: Tiny5, "Courier New", monospace;
-  background: #1a120a;
-  color: #f2f2f2;
+  font-family: Nunito, "Segoe UI", sans-serif;
+  background: var(--forest);
+  color: var(--ink);
   user-select: none;
 }
 
@@ -25,5 +27,4 @@ input {
 button {
   appearance: none;
   -webkit-appearance: none;
-  border-radius: 0;
 }
