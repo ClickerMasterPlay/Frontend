@@ -1,0 +1,57 @@
+.mc-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  min-width: 160px;
+  width: 100%;
+  height: 44px;
+  padding: 0 14px;
+  border: 3px solid var(--edge);
+  border-radius: 10px;
+  background: var(--btn);
+  color: var(--btn-ink);
+  font-size: 17px;
+  font-weight: 800;
+  line-height: 1;
+  box-shadow: inset 0 3px 0 var(--btn-hi), inset 0 -3px 0 var(--btn-lo), 3px 3px 0 var(--edge);
+  cursor: pointer;
+}
+
+.mc-btn--wide {
+  min-width: 0;
+}
+
+.mc-btn--slim {
+  min-width: 0;
+  height: 40px;
+  font-size: 16px;
+}
+
+.mc-btn--on {
+  box-shadow: inset 0 0 0 3px var(--edge), inset 0 3px 0 var(--btn-hi), inset 0 -3px 0 var(--btn-lo), 3px 3px 0 var(--edge);
+}
+
+.mc-btn__label {
+  pointer-events: none;
+}
+
+.mc-btn:hover:not(.mc-btn--off) {
+  filter: brightness(1.06);
+}
+
+.mc-btn:active:not(.mc-btn--off) {
+  filter: brightness(0.96);
+}
+
+.mc-btn--off {
+  background: #e7d7c2;
+  color: #8a7358;
+  box-shadow: inset 0 3px 0 #fff6ea, inset 0 -3px 0 #cbb89a, 3px 3px 0 var(--edge);
+  cursor: default;
+}
+
+.mc-btn:focus-visible {
+  outline: 2px solid #fff3c4;
+  outline-offset: 2px;
+}

@@ -1,0 +1,262 @@
+.game {
+  height: 100vh;
+  min-height: 100%;
+}
+
+.game--meadow {
+  --btn: #b6e36a;
+  --btn-hi: #e7ffb0;
+  --btn-lo: #4f8a28;
+  --btn-ink: #243024;
+}
+
+.game--forest {
+  --btn: #1f6b32;
+  --btn-hi: #7dce78;
+  --btn-lo: #0e3d1c;
+  --btn-ink: #fff8ee;
+}
+
+.game--mountains {
+  --btn: #4a90d9;
+  --btn-hi: #c5e4ff;
+  --btn-lo: #1d4f86;
+  --btn-ink: #fff8ee;
+}
+
+.game--cave {
+  --btn: #c5c9d1;
+  --btn-hi: #f2f4f8;
+  --btn-lo: #6d7380;
+  --btn-ink: #243024;
+}
+
+.game--sea {
+  --btn: #2ec4c6;
+  --btn-hi: #c8fbff;
+  --btn-lo: #0e6e78;
+  --btn-ink: #14343a;
+}
+
+.game__bg {
+  position: absolute;
+  z-index: 0;
+  top: 50%;
+  left: 50%;
+  width: 100%;
+  height: 100%;
+  background-position: center center;
+  background-repeat: no-repeat;
+  background-size: cover;
+  filter: blur(1px);
+  transform: translate(-50%, -50%) scale(1.04);
+}
+
+.game--meadow .game__bg { background-image: url("/biomes/meadow.jpg"); }
+.game--forest .game__bg { background-image: url("/biomes/forest.jpg"); }
+.game--mountains .game__bg { background-image: url("/biomes/mountains.jpg"); }
+.game--cave .game__bg { background-image: url("/biomes/cave.jpg"); }
+.game--sea .game__bg { background-image: url("/biomes/sea.jpg"); }
+
+.game__dim {
+  position: absolute;
+  z-index: 0;
+  inset: 0;
+  background: rgba(12, 24, 16, 0.12);
+  pointer-events: none;
+}
+
+.game__top {
+  position: absolute;
+  z-index: 5;
+  top: 16px;
+  right: 16px;
+  left: 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.game__coins {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 0 auto;
+  padding: 10px 14px;
+  border: 3px solid var(--edge);
+  border-radius: 10px;
+  background: var(--paper);
+  color: var(--ink);
+  font-size: 18px;
+  font-weight: 800;
+  box-shadow: 3px 3px 0 var(--edge);
+}
+
+.game__coin-icon {
+  width: 20px;
+  height: 20px;
+  border: 2px solid #8a5a10;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #ffe38a, #e0a91c 55%, #b8860b);
+  box-shadow: inset 0 0 0 2px #ffe9a0;
+}
+
+.game__rail {
+  position: absolute;
+  z-index: 5;
+  top: 84px;
+  left: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.game__tab {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  width: 108px;
+  height: 76px;
+  padding: 6px;
+  border: 3px solid var(--edge);
+  border-radius: 10px;
+  background: var(--btn);
+  color: var(--btn-ink);
+  font-size: 16px;
+  font-weight: 800;
+  line-height: 1.1;
+  box-shadow: inset 0 3px 0 var(--btn-hi), inset 0 -3px 0 var(--btn-lo), 3px 3px 0 var(--edge);
+  cursor: pointer;
+}
+
+.game__tab--on {
+  box-shadow: inset 0 0 0 3px var(--edge), inset 0 3px 0 var(--btn-hi), inset 0 -3px 0 var(--btn-lo), 3px 3px 0 var(--edge);
+}
+
+.game__tab:hover {
+  filter: brightness(1.06);
+}
+
+.game__tab:focus-visible {
+  outline: 2px solid #fff3c4;
+  outline-offset: 2px;
+}
+
+.game__panel {
+  position: absolute;
+  z-index: 4;
+  top: 84px;
+  left: 140px;
+  display: flex;
+  width: min(480px, calc(100vw - 170px));
+  max-height: min(520px, calc(100vh - 200px));
+  overflow: hidden;
+  border: 3px solid var(--edge);
+  border-radius: 10px;
+  background: var(--paper);
+  box-shadow: 3px 3px 0 var(--edge);
+}
+
+.game__panel-body {
+  flex: 1;
+  min-width: 0;
+  padding: 12px;
+  overflow: auto;
+}
+
+.game__panel .shop__name {
+  white-space: normal;
+  font-size: 17px;
+}
+
+.game__panel .shop__card .mc-btn {
+  min-width: 108px;
+}
+
+.game__field {
+  position: absolute;
+  z-index: 1;
+  inset: 0;
+  pointer-events: none;
+}
+
+.game__hint {
+  position: absolute;
+  top: calc(50% - min(200px, 26vmin) - 18px);
+  left: 50%;
+  margin: 0;
+  color: #243024;
+  font-size: 16px;
+  font-weight: 800;
+  white-space: nowrap;
+  text-shadow: 0 1px 0 #fff;
+  transform: translate(-50%, -100%);
+}
+
+.game--cave .game__hint,
+.game--sea .game__hint,
+.game--cave .mine__hp {
+  color: #fff8ee;
+  text-shadow: 0 2px 0 #3a2418;
+}
+
+.game__mine {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.game__rating-list,
+.game__quest-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.game__rating-list li,
+.game__quest {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 8px;
+  padding: 10px 12px;
+  border: 3px solid var(--edge);
+  border-radius: 8px;
+  background: var(--paper-2);
+  color: var(--ink);
+  font-size: 16px;
+  font-weight: 800;
+}
+
+.game__rating-you,
+.game__quest span:last-child {
+  color: var(--gold-2);
+}
+
+.game__bottom {
+  position: absolute;
+  z-index: 5;
+  bottom: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+@media (max-width: 640px) {
+  .game__hint {
+    font-size: 13px;
+  }
+
+  .game__tab {
+    width: 92px;
+    height: 68px;
+    font-size: 14px;
+  }
+
+  .game__panel {
+    left: 120px;
+    width: calc(100vw - 140px);
+  }
+}

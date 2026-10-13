@@ -1,0 +1,35 @@
+.mc-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  background: rgba(8, 16, 10, 0.62);
+}
+
+.mc-modal__box {
+  width: min(420px, 94vw);
+  padding: 14px;
+  border: 3px solid var(--edge);
+  border-radius: 10px;
+  background: var(--paper);
+  box-shadow: 3px 3px 0 var(--edge);
+}
+
+.mc-modal__box--wide {
+  width: min(640px, 94vw);
+}
+
+.mc-modal__title {
+  margin: 0 0 10px;
+  color: var(--ink);
+  font-family: Comfortaa, Nunito, sans-serif;
+  font-size: 22px;
+  text-align: center;
+}
+
+.mc-modal__body {
+  margin-bottom: 12px;
+}
