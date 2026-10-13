@@ -67,7 +67,6 @@ export function TitleScreen({ onStart, onSettings }: TitleScreenProps) {
 
       <footer className="title-screen__bar">
         <span>{t("version")}</span>
-        <span>{t("disclaimer")}</span>
       </footer>
     </div>
   );

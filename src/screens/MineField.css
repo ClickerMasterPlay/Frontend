@@ -1,19 +1,19 @@
 .mine {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 12px;
+  position: relative;
+  width: min(400px, 52vmin);
+  height: min(400px, 52vmin);
 }
 
 .mine__block {
-  width: 132px;
-  height: 132px;
+  width: 100%;
+  height: 100%;
   padding: 0;
-  border: 3px solid #6a4a24;
+  border: 4px solid #6a4524;
   border-radius: 16px;
-  background: linear-gradient(#8a7350, #5c4a32);
-  box-shadow: inset 0 8px 0 rgba(255, 255, 255, 0.12);
+  background: linear-gradient(160deg, #e6c48a, #c48a4a 48%, #a56b32);
+  box-shadow: 4px 4px 0 rgba(58, 36, 24, 0.28);
   cursor: pointer;
+  pointer-events: auto;
 }
 
 .mine__block--hit {
@@ -36,12 +36,16 @@
 }
 
 .mine__bar {
+  position: absolute;
+  top: calc(100% + 14px);
+  left: 50%;
   overflow: hidden;
-  width: 160px;
+  width: min(240px, 80%);
   height: 12px;
-  border: 2px solid #3d2a12;
+  border: 2px solid #6b4524;
   border-radius: 8px;
-  background: #1a120c;
+  background: #3a2416;
+  transform: translateX(-50%);
 }
 
 .mine__bar span {
@@ -51,8 +55,14 @@
 }
 
 .mine__hp {
+  position: absolute;
+  top: calc(100% + 34px);
+  left: 50%;
   margin: 0;
-  color: #e7f0dc;
-  font-size: 15px;
-  font-weight: 700;
+  color: #243024;
+  font-size: 18px;
+  font-weight: 800;
+  white-space: nowrap;
+  text-shadow: 0 1px 0 #fff;
+  transform: translateX(-50%);
 }

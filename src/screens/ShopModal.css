@@ -17,9 +17,9 @@
   align-items: center;
   gap: 10px;
   padding: 10px 12px;
-  border: 2px solid var(--line);
-  border-radius: var(--radius-sm);
-  background: linear-gradient(#f8e7b8, #e7cf8a);
+  border: 3px solid var(--edge);
+  border-radius: 8px;
+  background: var(--paper-2);
 }
 
 .shop__name,

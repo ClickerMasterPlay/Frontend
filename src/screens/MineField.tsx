@@ -10,7 +10,11 @@ function nextHp() {
   return BASE_HP + Math.floor(Math.random() * 3);
 }
 
-export function MineField() {
+type MineFieldProps = {
+  onBreak?: () => void;
+};
+
+export function MineField({ onBreak }: MineFieldProps) {
   const { t } = useSettings();
   const { owned, rewardMine } = useWallet();
   const [hp, setHp] = useState(BASE_HP);
@@ -28,6 +32,7 @@ export function MineField() {
       setHp(fresh);
       setMaxHp(fresh);
       rewardMine(BASE_REWARD + (owned.includes("machine") ? 1 : 0));
+      onBreak?.();
       return;
     }
     setHp(next);

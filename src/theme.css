@@ -1,15 +1,20 @@
 :root {
-  --ink: #3d2a12;
+  --ink: #3a2418;
   --ink-soft: #6a4b24;
-  --paper: #f4e2b0;
-  --paper-2: #ead28f;
+  --paper: #fff8ee;
+  --paper-2: #f6ead0;
   --gold: #e8b423;
   --gold-2: #c99212;
   --gold-hi: #f6d56a;
-  --line: #b8892a;
+  --line: #3a2418;
+  --edge: #3a2418;
+  --btn: #b6e36a;
+  --btn-hi: #e7ffb0;
+  --btn-lo: #4f8a28;
+  --btn-ink: #243024;
   --forest: #0c1610;
   --forest-2: #16301e;
   --leaf: #1f4a2c;
-  --radius: 8px;
-  --radius-sm: 6px;
+  --radius: 10px;
+  --radius-sm: 8px;
 }

@@ -6,9 +6,10 @@
 .profile__achs {
   width: 100%;
   padding: 12px;
-  border: 2px solid var(--line);
-  border-radius: var(--radius);
-  background: linear-gradient(#f8e7b8, #e7cf8a);
+  border: 3px solid var(--edge);
+  border-radius: 10px;
+  background: var(--paper);
+  box-shadow: 3px 3px 0 var(--edge);
 }
 
 .profile__name,
