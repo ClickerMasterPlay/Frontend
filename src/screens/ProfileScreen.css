@@ -61,3 +61,45 @@
 .profile__ach:not(.profile__ach--on) {
   color: var(--ink-soft);
 }
+
+.profile__form {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+  padding: 12px;
+  border: 2px solid var(--line);
+  border-radius: var(--radius);
+  background: linear-gradient(#f8e7b8, #e7cf8a);
+}
+
+.profile__field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  color: var(--ink);
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.profile__field input {
+  padding: 8px 10px;
+  border: 2px solid var(--line);
+  border-radius: 6px;
+  background: #fff8e4;
+  color: var(--ink);
+  font: 16px Nunito, sans-serif;
+}
+
+.profile__form-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.profile__error {
+  margin: 0;
+  color: #8a2a12;
+  font-size: 14px;
+  text-align: center;
+}

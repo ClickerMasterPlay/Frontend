@@ -62,7 +62,7 @@
   position: absolute;
   z-index: 0;
   inset: 0;
-  background: rgba(12, 24, 16, 0.12);
+  background: rgba(10, 18, 28, 0.28);
   pointer-events: none;
 }
 
@@ -73,8 +73,26 @@
   right: 16px;
   left: 16px;
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 10px;
+}
+
+.game__link {
+  margin: 0;
+  padding: 8px 12px;
+  border: 3px solid var(--edge);
+  border-radius: 10px;
+  background: rgba(12, 22, 16, 0.55);
+  color: #e7f0dc;
+  font-size: 14px;
+  font-weight: 800;
+  white-space: nowrap;
+  box-shadow: 3px 3px 0 var(--edge);
+}
+
+.game__link--on {
+  color: #b7e3a4;
 }
 
 .game__coins {
@@ -92,13 +110,15 @@
   box-shadow: 3px 3px 0 var(--edge);
 }
 
-.game__coin-icon {
+.game__stone-icon {
   width: 20px;
   height: 20px;
-  border: 2px solid #8a5a10;
-  border-radius: 50%;
-  background: radial-gradient(circle at 35% 30%, #ffe38a, #e0a91c 55%, #b8860b);
-  box-shadow: inset 0 0 0 2px #ffe9a0;
+  border: 2px solid #4a3a32;
+  border-radius: 5px;
+  background:
+    radial-gradient(circle at 30% 30%, #d2c8ba, transparent 45%),
+    linear-gradient(145deg, #a89f93, #6f675e);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.2);
 }
 
 .game__rail {
@@ -151,7 +171,7 @@
   left: 140px;
   display: flex;
   width: min(480px, calc(100vw - 170px));
-  max-height: min(520px, calc(100vh - 200px));
+  max-height: min(480px, calc(100vh - 220px));
   overflow: hidden;
   border: 3px solid var(--edge);
   border-radius: 10px;
@@ -184,27 +204,30 @@
 
 .game__hint {
   position: absolute;
-  top: calc(50% - min(200px, 26vmin) - 18px);
+  top: calc(50% - min(190px, 25vmin) - 28px);
   left: 50%;
+  z-index: 2;
+  max-width: min(420px, 86vw);
   margin: 0;
-  color: #243024;
+  padding: 8px 14px;
+  border: 3px solid var(--edge);
+  border-radius: 10px;
+  background: rgba(255, 248, 230, 0.94);
+  color: var(--ink);
   font-size: 16px;
   font-weight: 800;
-  white-space: nowrap;
-  text-shadow: 0 1px 0 #fff;
+  line-height: 1.25;
+  text-align: center;
+  text-shadow: none;
+  white-space: normal;
+  box-shadow: 3px 3px 0 var(--edge);
   transform: translate(-50%, -100%);
-}
-
-.game--cave .game__hint,
-.game--sea .game__hint,
-.game--cave .mine__hp {
-  color: #fff8ee;
-  text-shadow: 0 2px 0 #3a2418;
+  pointer-events: none;
 }
 
 .game__mine {
   position: absolute;
-  top: 50%;
+  top: 48%;
   left: 50%;
   transform: translate(-50%, -50%);
 }
@@ -238,7 +261,7 @@
 
 .game__bottom {
   position: absolute;
-  z-index: 5;
+  z-index: 6;
   bottom: 16px;
   left: 50%;
   transform: translateX(-50%);

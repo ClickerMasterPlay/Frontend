@@ -22,8 +22,13 @@
   background: var(--paper-2);
 }
 
+.shop__info {
+  min-width: 0;
+}
+
 .shop__name,
-.shop__price {
+.shop__price,
+.shop__effect {
   margin: 0;
   color: var(--ink);
   text-align: left;
@@ -33,7 +38,13 @@
   min-height: 0;
   font-size: 16px;
   font-weight: 700;
-  white-space: nowrap;
+}
+
+.shop__effect {
+  margin-top: 2px;
+  color: var(--ink-soft);
+  font-size: 13px;
+  font-weight: 400;
 }
 
 .shop__price {

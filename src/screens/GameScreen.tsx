@@ -1,5 +1,6 @@
 import { useState, type ReactNode } from "react";
 import { GearButton } from "../components/GearButton";
+import { useSession } from "../session/SessionContext";
 import { useSettings } from "../settings/SettingsContext";
 import { useWallet } from "../wallet/WalletContext";
 import { InventoryPanel } from "./InventoryPanel";
@@ -23,9 +24,6 @@ const QUESTS = [
 ];
 
 type GameTab = "shop" | "rating" | "quests";
-type Biome = "meadow" | "forest" | "mountains" | "cave" | "sea";
-
-const BIOMES: Biome[] = ["meadow", "forest", "mountains", "cave", "sea"];
 
 type GameScreenProps = {
   onSettings: () => void;
@@ -77,31 +75,33 @@ function RailTab({
 
 export function GameScreen({ onSettings, onProfile }: GameScreenProps) {
   const { t, settings } = useSettings();
-  const { coins } = useWallet();
+  const { stones } = useWallet();
+  const { status } = useSession();
   const [tab, setTab] = useState<GameTab | null>(tabFromHash);
-  const [biomeIndex, setBiomeIndex] = useState(0);
-  const biome = BIOMES[biomeIndex];
 
   const toggleTab = (next: GameTab) => {
     setTab((current) => (current === next ? null : next));
   };
 
-  const onBreak = () => {
-    setBiomeIndex((index) => (index + 1) % BIOMES.length);
-  };
-
   return (
-    <div className={`title-screen game game--${biome}`}>
+    <div className="title-screen game game--mountains">
       <div className="game__bg" />
       <div className="game__dim" />
 
       <div className="game__top">
         <GearButton label={t("settings")} onClick={onSettings} />
         <ProfileButton label={t("profile")} onClick={onProfile} />
+        <p className={status === "online" ? "game__link game__link--on" : "game__link"}>
+          {status === "online"
+            ? t("serverOnline")
+            : status === "checking"
+              ? t("connecting")
+              : t("serverOffline")}
+        </p>
         <p className="game__coins">
-          <span className="game__coin-icon" aria-hidden="true" />
+          <span className="game__stone-icon" aria-hidden="true" />
           <span>
-            {t("coins")} · {coins}
+            {t("stones")} · {stones}
           </span>
         </p>
       </div>
@@ -181,7 +181,7 @@ export function GameScreen({ onSettings, onProfile }: GameScreenProps) {
       <main className="game__field">
         {settings.hints && !tab ? <p className="game__hint">{t("hintGame")}</p> : null}
         <div className="game__mine">
-          <MineField onBreak={onBreak} />
+          <MineField />
         </div>
       </main>
 

@@ -4,6 +4,7 @@ import { GameScreen } from "./screens/GameScreen";
 import { ProfileScreen } from "./screens/ProfileScreen";
 import { SettingsScreen } from "./screens/SettingsScreen";
 import { TitleScreen } from "./screens/TitleScreen";
+import { SessionProvider, useSession } from "./session/SessionContext";
 import { SettingsProvider } from "./settings/SettingsContext";
 import { WalletProvider } from "./wallet/WalletContext";
 
@@ -26,6 +27,7 @@ function screenFromHash(): Screen {
 }
 
 function AppScreens() {
+  const { ensureGuest, busy } = useSession();
   const [screen, setScreen] = useState<Screen>(screenFromHash);
   const [settingsFrom, setSettingsFrom] = useState<Screen>("title");
 
@@ -57,7 +59,10 @@ function AppScreens() {
         />
       ) : (
         <TitleScreen
-          onStart={() => setScreen("game")}
+          starting={busy}
+          onStart={() => {
+            void ensureGuest().finally(() => setScreen("game"));
+          }}
           onSettings={() => openSettings("title")}
         />
       )}
@@ -68,9 +73,11 @@ function AppScreens() {
 export default function App() {
   return (
     <SettingsProvider>
-      <WalletProvider>
-        <AppScreens />
-      </WalletProvider>
+      <SessionProvider>
+        <WalletProvider>
+          <AppScreens />
+        </WalletProvider>
+      </SessionProvider>
     </SettingsProvider>
   );
 }

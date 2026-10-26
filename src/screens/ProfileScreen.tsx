@@ -1,4 +1,6 @@
+import { useState } from "react";
 import { McButton } from "../components/McButton";
+import { useSession } from "../session/SessionContext";
 import { useSettings } from "../settings/SettingsContext";
 import { useWallet } from "../wallet/WalletContext";
 import "./TitleScreen.css";
@@ -9,18 +11,24 @@ type ProfileScreenProps = {
   onBack: () => void;
 };
 
-const ACHIEVEMENTS = [
-  { key: "achGuest" as const, done: true },
-  { key: "achFirstClick" as const, done: false },
-  { key: "achBreakBlock" as const, done: false },
-  { key: "achStack" as const, done: false },
-  { key: "achTool" as const, done: false },
-  { key: "achTop" as const, done: false },
-];
-
 export function ProfileScreen({ onBack }: ProfileScreenProps) {
   const { t } = useSettings();
-  const { coins, blocksBroken } = useWallet();
+  const { stones, blocksBroken, clickPower, owned } = useWallet();
+  const { session, busy, error, login, register } = useSession();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [displayName, setDisplayName] = useState("");
+
+  const name = session?.displayName || t("guestName");
+  const mode = session && !session.isGuest ? t("registeredMode") : t("guestMode");
+  const achievements = [
+    { key: "achGuest" as const, done: true },
+    { key: "achFirstClick" as const, done: blocksBroken > 0 || clickPower > 1 },
+    { key: "achBreakBlock" as const, done: blocksBroken > 0 },
+    { key: "achStack" as const, done: stones >= 10 },
+    { key: "achTool" as const, done: owned.some((id) => id.includes("pickaxe")) },
+    { key: "achTop" as const, done: false },
+  ];
 
   return (
     <div className="title-screen">
@@ -28,45 +36,112 @@ export function ProfileScreen({ onBack }: ProfileScreenProps) {
       <div className="title-screen__shade" />
 
       <div className="title-screen__content">
-      <div className="settings profile">
-        <h1 className="settings__title">{t("profile")}</h1>
+        <div className="settings profile">
+          <h1 className="settings__title">{t("profile")}</h1>
 
-        <div className="profile__card">
-          <p className="profile__name">{t("guestName")}</p>
-          <p className="profile__mode">{t("guestMode")}</p>
-          <ul className="profile__stats">
-            <li>
-              <span>{t("statBlocks")}</span>
-              <span>{blocksBroken}</span>
-            </li>
-            <li>
-              <span>{t("statCoins")}</span>
-              <span>{coins}</span>
-            </li>
-          </ul>
-        </div>
-
-        <section className="profile__achs" aria-label={t("achievements")}>
-          <p className="profile__achs-title">{t("achievements")}</p>
-          <ul className="profile__ach-list">
-            {ACHIEVEMENTS.map((item) => (
-              <li
-                key={item.key}
-                className={item.done ? "profile__ach profile__ach--on" : "profile__ach"}
-              >
-                <span>{t(item.key)}</span>
-                <span>{item.done ? t("achDone") : t("achLocked")}</span>
+          <div className="profile__card">
+            <p className="profile__name">{name}</p>
+            <p className="profile__mode">{mode}</p>
+            <ul className="profile__stats">
+              <li>
+                <span>{t("statBlocks")}</span>
+                <span>{blocksBroken}</span>
               </li>
-            ))}
-          </ul>
-        </section>
+              <li>
+                <span>{t("statStones")}</span>
+                <span>{stones}</span>
+              </li>
+              <li>
+                <span>{t("statClickPower")}</span>
+                <span>{clickPower}</span>
+              </li>
+            </ul>
+          </div>
 
-        <div className="settings__actions">
-          <McButton wide onClick={onBack}>
-            {t("back")}
-          </McButton>
+          <form
+            className="profile__form"
+            onSubmit={(event) => {
+              event.preventDefault();
+              void login(email, password);
+            }}
+          >
+            <p className="profile__achs-title">{t("account")}</p>
+            <label className="profile__field">
+              <span>{t("email")}</span>
+              <input
+                type="email"
+                autoComplete="username"
+                value={email}
+                onChange={(event) => setEmail(event.target.value)}
+              />
+            </label>
+            <label className="profile__field">
+              <span>{t("password")}</span>
+              <input
+                type="password"
+                autoComplete="current-password"
+                minLength={8}
+                value={password}
+                onChange={(event) => setPassword(event.target.value)}
+              />
+            </label>
+            {session?.isGuest !== false ? (
+              <label className="profile__field">
+                <span>{t("displayName")}</span>
+                <input
+                  type="text"
+                  maxLength={100}
+                  value={displayName}
+                  onChange={(event) => setDisplayName(event.target.value)}
+                />
+              </label>
+            ) : null}
+            {error ? <p className="profile__error">{error}</p> : null}
+            <div className="profile__form-actions">
+              <McButton
+                slim
+                disabled={busy || !email || !password}
+                onClick={() => {
+                  void login(email, password);
+                }}
+              >
+                {t("login")}
+              </McButton>
+              {session?.isGuest !== false ? (
+                <McButton
+                  slim
+                  disabled={busy || !email || password.length < 8}
+                  onClick={() => {
+                    void register(email, password, displayName);
+                  }}
+                >
+                  {t("register")}
+                </McButton>
+              ) : null}
+            </div>
+          </form>
+
+          <section className="profile__achs" aria-label={t("achievements")}>
+            <p className="profile__achs-title">{t("achievements")}</p>
+            <ul className="profile__ach-list">
+              {achievements.map((item) => (
+                <li
+                  key={item.key}
+                  className={item.done ? "profile__ach profile__ach--on" : "profile__ach"}
+                >
+                  <span>{t(item.key)}</span>
+                  <span>{item.done ? t("achDone") : t("achLocked")}</span>
+                </li>
+              ))}
+            </ul>
+          </section>
+
+          <div className="settings__actions">
+            <McButton wide onClick={onBack}>
+              {t("back")}
+            </McButton>
+          </div>
         </div>
-      </div>
       </div>
     </div>
   );

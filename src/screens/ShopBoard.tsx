@@ -1,35 +1,34 @@
 import { McButton } from "../components/McButton";
 import { useSettings } from "../settings/SettingsContext";
-import { SHOP_ITEMS, type ShopItemId } from "../wallet/wallet";
+import { catalogTitleKey } from "../wallet/wallet";
 import { useWallet } from "../wallet/WalletContext";
 import "./ShopModal.css";
 
-const TITLES: Record<ShopItemId, "shopClick" | "shopPick" | "shopMachine"> = {
-  click: "shopClick",
-  pick: "shopPick",
-  machine: "shopMachine",
-};
-
 export function ShopBoard() {
   const { t } = useSettings();
-  const { coins, owned, buy } = useWallet();
+  const { stones, owned, catalog, buy, lastError } = useWallet();
 
   return (
     <div className="shop shop--panel">
+      {lastError ? <p className="shop__balance">{lastError}</p> : null}
       <div className="shop__grid">
-        {SHOP_ITEMS.map((item) => {
-          const isOwned = owned.includes(item.id);
+        {catalog.map((item) => {
+          const titleKey = catalogTitleKey(item.productId);
+          const isOwned = item.productType !== "CLICK_UPGRADE" && owned.includes(item.productId);
           return (
-            <article key={item.id} className="shop__card">
-              <p className="shop__name">{t(TITLES[item.id])}</p>
+            <article key={`${item.productType}:${item.productId}`} className="shop__card">
+              <div className="shop__info">
+                <p className="shop__name">{titleKey ? t(titleKey) : item.productId}</p>
+                {item.effect ? <p className="shop__effect">{item.effect}</p> : null}
+              </div>
               <p className="shop__price">
-                {t("shopPrice")}: {item.price}
+                {t("shopPrice")}: {item.price} {t("stonesShort")}
               </p>
               <McButton
                 slim
-                disabled={isOwned || coins < item.price}
+                disabled={isOwned || stones < item.price}
                 onClick={() => {
-                  buy(item.id);
+                  void buy(item);
                 }}
               >
                 {isOwned ? t("shopOwned") : t("shopBuy")}
