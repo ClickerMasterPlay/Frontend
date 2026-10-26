@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { McButton } from "../components/McButton";
+import { formatStones } from "../game/levels";
 import { useSession } from "../session/SessionContext";
 import { useSettings } from "../settings/SettingsContext";
 import { useWallet } from "../wallet/WalletContext";
@@ -12,8 +13,8 @@ type ProfileScreenProps = {
 };
 
 export function ProfileScreen({ onBack }: ProfileScreenProps) {
-  const { t } = useSettings();
-  const { stones, blocksBroken, clickPower, owned } = useWallet();
+  const { t, settings } = useSettings();
+  const { stones, blocksBroken, power, owned } = useWallet();
   const { session, busy, error, login, register } = useSession();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -23,10 +24,10 @@ export function ProfileScreen({ onBack }: ProfileScreenProps) {
   const mode = session && !session.isGuest ? t("registeredMode") : t("guestMode");
   const achievements = [
     { key: "achGuest" as const, done: true },
-    { key: "achFirstClick" as const, done: blocksBroken > 0 || clickPower > 1 },
+    { key: "achFirstClick" as const, done: blocksBroken > 0 || power > 1 },
     { key: "achBreakBlock" as const, done: blocksBroken > 0 },
     { key: "achStack" as const, done: stones >= 10 },
-    { key: "achTool" as const, done: owned.some((id) => id.includes("pickaxe")) },
+    { key: "achTool" as const, done: owned.some((id) => id === "wood" || id === "iron" || id === "gold") },
     { key: "achTop" as const, done: false },
   ];
 
@@ -49,11 +50,11 @@ export function ProfileScreen({ onBack }: ProfileScreenProps) {
               </li>
               <li>
                 <span>{t("statStones")}</span>
-                <span>{stones}</span>
+                <span>{formatStones(stones, settings.language === "ru")}</span>
               </li>
               <li>
                 <span>{t("statClickPower")}</span>
-                <span>{clickPower}</span>
+                <span>{formatStones(power, settings.language === "ru")}</span>
               </li>
             </ul>
           </div>

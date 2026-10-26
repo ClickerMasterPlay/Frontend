@@ -1,6 +1,6 @@
-import { itemView } from "../game/items";
+import { PixelIcon } from "../components/PixelIcon";
+import { isUpgradeId, upgradeTitleKey } from "../game/upgrades";
 import { useSettings } from "../settings/SettingsContext";
-import { catalogTitleKey } from "../wallet/wallet";
 import { useWallet } from "../wallet/WalletContext";
 import "./ResourceStub.css";
 
@@ -10,14 +10,11 @@ export function ResourceStub() {
 
   return (
     <section className="res-stub" aria-label={t("quickAccess")}>
-      <p className="res-stub__title">{t("quickAccess")}</p>
-      <div className="res-stub__row">
-        {owned.length === 0 ? (
-          <p className="res-stub__note">{t("quickAccessEmpty")}</p>
-        ) : (
-          owned.map((productId) => {
-            const titleKey = catalogTitleKey(productId);
-            const label = titleKey ? t(titleKey) : t(itemView(productId).key);
+      {owned.length > 0 ? (
+        <div className="res-stub__row">
+          {owned.map((productId) => {
+            const upgrade = isUpgradeId(productId) ? productId : null;
+            const label = upgrade ? t(upgradeTitleKey(upgrade)) : productId;
             const on = active.includes(productId);
             return (
               <button
@@ -28,13 +25,13 @@ export function ResourceStub() {
                 aria-pressed={on}
                 onClick={() => toggleActive(productId)}
               >
-                <span>{itemView(productId).mark}</span>
+                {upgrade ? <PixelIcon kind={upgrade} /> : <span>{productId.slice(0, 2)}</span>}
               </button>
             );
-          })
-        )}
-      </div>
-      {owned.length > 0 ? <p className="res-stub__note">{t("quickAccessHint")}</p> : null}
+          })}
+        </div>
+      ) : null}
+      <p className="res-stub__note">{owned.length === 0 ? t("quickAccessEmpty") : t("quickAccessHint")}</p>
     </section>
   );
 }
