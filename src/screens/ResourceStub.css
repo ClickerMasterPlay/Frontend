@@ -1,31 +1,28 @@
 .res-stub {
-  width: min(560px, 94vw);
-  padding: 10px 12px 12px;
-  border: 3px solid var(--edge);
-  border-radius: 10px;
-  background: var(--paper);
-  box-shadow: 3px 3px 0 var(--edge);
-  pointer-events: auto;
-}
-
-.res-stub__title,
-.res-stub__note {
-  margin: 0;
-  color: var(--ink);
-  text-align: center;
-}
-
-.res-stub__title {
-  margin-bottom: 8px;
-  font-size: 16px;
-  font-weight: 800;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+  pointer-events: none;
 }
 
 .res-stub__note {
-  margin-top: 8px;
+  margin: 8px 0 0;
+  color: #fff6e4;
   font-size: 13px;
-  font-weight: 700;
-  color: var(--ink-soft);
+  font-weight: 800;
+  line-height: 1.3;
+  text-align: center;
+  text-shadow:
+    2px 0 0 #1a120c,
+    -2px 0 0 #1a120c,
+    0 2px 0 #1a120c,
+    0 -2px 0 #1a120c,
+    2px 2px 0 #1a120c,
+    -2px 2px 0 #1a120c,
+    2px -2px 0 #1a120c,
+    -2px -2px 0 #1a120c;
 }
 
 .res-stub__row {
@@ -52,6 +49,7 @@
   font-size: 14px;
   font-weight: 800;
   cursor: pointer;
+  pointer-events: auto;
   opacity: 0.55;
   filter: grayscale(0.35);
 }
@@ -61,6 +59,11 @@
   box-shadow: inset 0 0 0 2px #a87410;
   opacity: 1;
   filter: none;
+}
+
+.res-stub__slot .px-icon {
+  width: 34px;
+  height: 34px;
 }
 
 .res-stub__slot:hover {

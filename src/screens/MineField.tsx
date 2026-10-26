@@ -7,15 +7,18 @@ import {
   DEFAULT_BLOCK,
   type BlockState,
 } from "../api/types";
+import { clickReward, formatStones, pieceCount, stoneKind } from "../game/levels";
 import { useSession } from "../session/SessionContext";
+import { useSettings } from "../settings/SettingsContext";
 import { useWallet } from "../wallet/WalletContext";
-import { effectiveClickPower, toolMultiplier } from "../wallet/wallet";
+import { StonePile } from "./StonePile";
 import "./MineField.css";
 
 type Floater = {
   id: number;
   x: number;
   y: number;
+  text: string;
 };
 
 type MineFieldProps = {
@@ -24,12 +27,13 @@ type MineFieldProps = {
 
 export function MineField({ onBreak }: MineFieldProps) {
   const { session, status } = useSession();
+  const { settings } = useSettings();
   const {
-    active,
-    clickPower,
-    equippedToolCode,
     applyClickResult,
-    rewardMineLocal,
+    stoneIndex,
+    rewardClick,
+    advanceStone,
+    power,
   } = useWallet();
   const [, setBlock] = useState<BlockState>(DEFAULT_BLOCK);
   const [hit, setHit] = useState(false);
@@ -39,14 +43,7 @@ export function MineField({ onBreak }: MineFieldProps) {
   const lastFlush = useRef(0);
   const floaterId = useRef(0);
 
-  const damage = Math.max(
-    1,
-    Math.ceil(
-      effectiveClickPower(clickPower, active) * toolMultiplier(active, equippedToolCode),
-    ),
-  );
-
-  const spawnFloater = (clientX: number, clientY: number, root: DOMRect) => {
+  const spawnFloater = (clientX: number, clientY: number, root: DOMRect, text: string) => {
     const id = ++floaterId.current;
     setFloaters((current) => [
       ...current.slice(-12),
@@ -54,6 +51,7 @@ export function MineField({ onBreak }: MineFieldProps) {
         id,
         x: clientX - root.left,
         y: clientY - root.top,
+        text,
       },
     ]);
     window.setTimeout(() => {
@@ -63,11 +61,10 @@ export function MineField({ onBreak }: MineFieldProps) {
 
   const applyLocalHit = () => {
     setBlock((current) => {
-      const nextHp = current.currentHp - damage;
+      const nextHp = current.currentHp - 1;
       if (nextHp > 0) {
         return { ...current, currentHp: nextHp };
       }
-      rewardMineLocal(1, current.type || "stone", 1);
       onBreak?.();
       return { ...DEFAULT_BLOCK };
     });
@@ -99,7 +96,6 @@ export function MineField({ onBreak }: MineFieldProps) {
         if (current.currentHp > 0) {
           return current;
         }
-        rewardMineLocal(1, current.type || "stone", 1);
         onBreak?.();
         return { ...DEFAULT_BLOCK };
       });
@@ -130,7 +126,10 @@ export function MineField({ onBreak }: MineFieldProps) {
 
   const onMine = (event: MouseEvent<HTMLButtonElement>) => {
     const root = event.currentTarget.getBoundingClientRect();
-    spawnFloater(event.clientX, event.clientY, root);
+    const reward = clickReward(stoneIndex) * power;
+    const text = `+${formatStones(reward, settings.language === "ru")}`;
+    spawnFloater(event.clientX, event.clientY, root, text);
+    rewardClick(reward);
     setHit(true);
     window.setTimeout(() => setHit(false), 120);
     if (status !== "online" || !session) {
@@ -140,7 +139,7 @@ export function MineField({ onBreak }: MineFieldProps) {
     pendingRef.current += 1;
     setBlock((current) => ({
       ...current,
-      currentHp: Math.max(0, current.currentHp - damage),
+      currentHp: Math.max(0, current.currentHp - 1),
     }));
     if (pendingRef.current >= CLICK_BATCH_LIMIT) {
       if (flushTimer.current !== null) {
@@ -155,17 +154,15 @@ export function MineField({ onBreak }: MineFieldProps) {
 
   return (
     <div className="mine">
-      <button
-        type="button"
-        className={hit ? "mine__block mine__block--hit" : "mine__block"}
-        onClick={onMine}
-        aria-label="stone"
+      <StonePile
+        key={stoneIndex}
+        kind={stoneKind(stoneIndex)}
+        pieceCount={pieceCount(stoneIndex)}
+        power={power}
+        shaking={hit}
+        onMine={onMine}
+        onBreak={advanceStone}
       >
-        <span className="mine__stone" aria-hidden="true">
-          <span className="mine__crack mine__crack--a" />
-          <span className="mine__crack mine__crack--b" />
-          <span className="mine__moss" />
-        </span>
         {floaters.map((item) => (
           <span
             key={item.id}
@@ -173,11 +170,10 @@ export function MineField({ onBreak }: MineFieldProps) {
             style={{ left: item.x, top: item.y }}
             aria-hidden="true"
           >
-            <span className="mine__floater-stone" />
-            <b>+1</b>
+            <b>{item.text}</b>
           </span>
         ))}
-      </button>
+      </StonePile>
     </div>
   );
 }

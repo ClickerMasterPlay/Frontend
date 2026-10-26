@@ -1,8 +1,10 @@
-import { useState, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { GearButton } from "../components/GearButton";
+import { biomeFor, formatStones, levelNumber } from "../game/levels";
 import { useSession } from "../session/SessionContext";
 import { useSettings } from "../settings/SettingsContext";
 import { useWallet } from "../wallet/WalletContext";
+import { QuestBoard } from "./QuestBoard";
 import { InventoryPanel } from "./InventoryPanel";
 import { MineField } from "./MineField";
 import { ShopBoard } from "./ShopBoard";
@@ -15,12 +17,6 @@ const STUB_PLAYERS = [
   { name: "Guest_42", score: "910" },
   { name: "Cobble", score: "640" },
   { name: "Rookie", score: "220" },
-];
-
-const QUESTS = [
-  { key: "questBreak" as const, reward: "5" },
-  { key: "questBuy" as const, reward: "10" },
-  { key: "questRate" as const, reward: "8" },
 ];
 
 type GameTab = "shop" | "rating" | "quests";
@@ -75,33 +71,51 @@ function RailTab({
 
 export function GameScreen({ onSettings, onProfile }: GameScreenProps) {
   const { t, settings } = useSettings();
-  const { stones } = useWallet();
+  const { stones, stoneIndex } = useWallet();
   const { status } = useSession();
   const [tab, setTab] = useState<GameTab | null>(tabFromHash);
+  const [hintOn, setHintOn] = useState(settings.hints);
+
+  useEffect(() => {
+    if (!settings.hints) {
+      return;
+    }
+    const timer = window.setTimeout(() => setHintOn(false), 5450);
+    return () => window.clearTimeout(timer);
+  }, [settings.hints]);
 
   const toggleTab = (next: GameTab) => {
     setTab((current) => (current === next ? null : next));
   };
 
   return (
-    <div className="title-screen game game--mountains">
+    <div className={`title-screen game game--${biomeFor(stoneIndex)}${tab ? " game--open" : ""}`}>
       <div className="game__bg" />
       <div className="game__dim" />
+      {tab ? (
+        <button
+          type="button"
+          className="game__backdrop"
+          aria-label={t("close")}
+          onClick={() => setTab(null)}
+        />
+      ) : null}
 
       <div className="game__top">
         <GearButton label={t("settings")} onClick={onSettings} />
         <ProfileButton label={t("profile")} onClick={onProfile} />
-        <p className={status === "online" ? "game__link game__link--on" : "game__link"}>
+        <p className={status === "online" ? "game__link game__link--on game__status" : "game__link game__status"}>
           {status === "online"
             ? t("serverOnline")
             : status === "checking"
               ? t("connecting")
               : t("serverOffline")}
         </p>
+        <p className="game__link">{t("level")} {levelNumber(stoneIndex)}</p>
         <p className="game__coins">
           <span className="game__stone-icon" aria-hidden="true" />
           <span>
-            {t("stones")} · {stones}
+            {t("stones")} · {formatStones(stones, settings.language === "ru")}
           </span>
         </p>
       </div>
@@ -141,6 +155,7 @@ export function GameScreen({ onSettings, onProfile }: GameScreenProps) {
         />
       </div>
 
+      <div className="game__stage">
       {tab ? (
         <section className="game__panel" role="tabpanel">
           <div className="game__panel-body">
@@ -161,29 +176,19 @@ export function GameScreen({ onSettings, onProfile }: GameScreenProps) {
               </ol>
             ) : null}
 
-            {tab === "quests" ? (
-              <ul className="game__quest-list">
-                {QUESTS.map((quest) => (
-                  <li key={quest.key} className="game__quest">
-                    <span>{t(quest.key)}</span>
-                    <span>
-                      {t("questReward")}: {quest.reward}
-                    </span>
-                  </li>
-                ))}
-              </ul>
-            ) : null}
+            {tab === "quests" ? <QuestBoard /> : null}
           </div>
           {tab === "shop" ? <InventoryPanel /> : null}
         </section>
       ) : null}
 
       <main className="game__field">
-        {settings.hints && !tab ? <p className="game__hint">{t("hintGame")}</p> : null}
+        {hintOn ? <p className="game__hint">{t("hintGame")}</p> : null}
         <div className="game__mine">
           <MineField />
         </div>
       </main>
+      </div>
 
       <div className="game__bottom">
         <ResourceStub />

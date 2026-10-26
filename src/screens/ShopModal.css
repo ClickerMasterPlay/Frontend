@@ -12,14 +12,26 @@
 }
 
 .shop__card {
-  display: grid;
-  grid-template-columns: 1fr auto auto;
-  align-items: center;
-  gap: 10px;
-  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px;
   border: 3px solid var(--edge);
   border-radius: 8px;
   background: var(--paper-2);
+}
+
+.shop__head {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+  min-width: 0;
+}
+
+.shop__card .px-icon {
+  width: 64px;
+  height: 64px;
+  flex: none;
 }
 
 .shop__info {
@@ -28,38 +40,143 @@
 
 .shop__name,
 .shop__price,
-.shop__effect {
+.shop__effect,
+.shop__note {
   margin: 0;
   color: var(--ink);
   text-align: left;
 }
 
 .shop__name {
-  min-height: 0;
-  font-size: 16px;
+  font-size: 15px;
   font-weight: 700;
+  line-height: 1.2;
+  overflow-wrap: break-word;
+}
+
+.shop__stars {
+  display: flex;
+  gap: 3px;
+  margin: 3px 0 2px;
+}
+
+.shop__star {
+  width: 14px;
+  height: 14px;
+  fill: transparent;
+  stroke: var(--ink-soft);
+  stroke-width: 1;
+}
+
+.shop__star--on {
+  fill: var(--gold);
+  stroke: #8a5a12;
 }
 
 .shop__effect {
-  margin-top: 2px;
+  margin-top: 1px;
   color: var(--ink-soft);
   font-size: 13px;
   font-weight: 400;
+  line-height: 1.25;
+}
+
+.shop__buy {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
 }
 
 .shop__price {
   color: var(--gold-2);
   font-weight: 700;
-  white-space: nowrap;
 }
 
 .shop__card .mc-btn {
   width: auto;
-  min-width: 110px;
+  min-width: 96px;
 }
 
-@media (max-width: 700px) {
+.shop__note {
+  margin-top: 10px;
+  color: var(--ink-soft);
+  font-size: 13px;
+  line-height: 1.35;
+  text-align: left;
+}
+
+@media (max-width: 800px) {
+  .shop__grid {
+    gap: 6px;
+  }
+
   .shop__card {
-    grid-template-columns: 1fr;
+    display: grid;
+    grid-template-columns: 40px minmax(0, 1fr) auto;
+    grid-template-areas:
+      "icon name buy"
+      "icon info buy";
+    align-items: center;
+    gap: 1px 8px;
+    padding: 6px 8px;
+  }
+
+  .shop__head {
+    display: contents;
+  }
+
+  .shop__name {
+    grid-area: name;
+    font-size: 14px;
+  }
+
+  .shop__card .px-icon {
+    grid-area: icon;
+    width: 40px;
+    height: 40px;
+    align-self: center;
+  }
+
+  .shop__info {
+    grid-area: info;
+  }
+
+  .shop__stars {
+    margin: 0;
+  }
+
+  .shop__star {
+    width: 12px;
+    height: 12px;
+  }
+
+  .shop__effect {
+    font-size: 12px;
+    line-height: 1.15;
+  }
+
+  .shop__buy {
+    grid-area: buy;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 2px;
+  }
+
+  .shop__price {
+    font-size: 12px;
+  }
+
+  .shop__card .mc-btn {
+    min-width: 0;
+    height: 32px;
+    padding: 0 10px;
+    font-size: 13px;
+  }
+
+  .shop__note {
+    margin-top: 6px;
+    font-size: 12px;
   }
 }

@@ -2,6 +2,32 @@
 
 * {
   box-sizing: border-box;
+  scrollbar-width: thin;
+  scrollbar-color: var(--gold-2) var(--paper-2);
+}
+
+*::-webkit-scrollbar {
+  width: 14px;
+  height: 14px;
+}
+
+*::-webkit-scrollbar-track {
+  background: var(--paper-2);
+  border-left: 3px solid var(--edge);
+}
+
+*::-webkit-scrollbar-thumb {
+  background: var(--gold);
+  border: 3px solid var(--edge);
+  border-radius: 8px;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background: var(--gold-hi);
+}
+
+*::-webkit-scrollbar-corner {
+  background: var(--paper);
 }
 
 html,
@@ -27,4 +53,5 @@ input {
 button {
   appearance: none;
   -webkit-appearance: none;
+  touch-action: manipulation;
 }
