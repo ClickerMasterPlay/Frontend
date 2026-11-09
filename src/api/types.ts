@@ -125,6 +125,22 @@ export type ChallengeClaimResult = {
   challenges: ChallengeListPayload;
 };
 
+export type LeaderboardEntry = {
+  rank: number;
+  userId: string;
+  displayName: string | null;
+  score: number;
+  credits: number;
+  totalResourcesValue: number;
+  clickPower: number;
+};
+
+export type LeaderboardPayload = {
+  top: LeaderboardEntry[];
+  me: LeaderboardEntry | null;
+  totalPlayers: number;
+};
+
 export const FALLBACK_CATALOG: CatalogItem[] = [
   {
     productType: "CLICK_UPGRADE",

@@ -54,6 +54,8 @@ type WalletContextValue = {
   equippedToolCode: string | null;
   upgrades: WalletState["upgrades"];
   power: number;
+  /** Backend base clickPower used for credit formula: ceil(clicks * clickPower). */
+  serverClickPower: number;
   quest: WalletState["quest"];
   challenges: ChallengeListPayload | null;
   buyUpgrade: (id: UpgradeId) => Promise<BuyResult>;
@@ -112,6 +114,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
   const [wallet, setWallet] = useState<WalletState>(emptyWallet(0));
   const [ready, setReady] = useState(false);
   const [challenges, setChallenges] = useState<ChallengeListPayload | null>(null);
+  const [serverClickPower, setServerClickPower] = useState(1);
 
   const online = status === "online" && Boolean(session);
 
@@ -158,6 +161,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
     if (!lastProgress) {
       return;
     }
+    setServerClickPower(Math.max(0.1, lastProgress.clickPower || 1));
     setWallet((current) => ({
       ...current,
       coins: lastProgress.credits,
@@ -184,6 +188,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
         if (cancelled) {
           return;
         }
+        setServerClickPower(Math.max(0.1, progress.clickPower || 1));
         setWallet((current) =>
           applyInventory(
             {
@@ -248,6 +253,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
       equippedToolCode: wallet.equippedToolCode,
       upgrades: wallet.upgrades,
       power: strikePower(wallet.upgrades, wallet.active, wallet.equippedToolCode),
+      serverClickPower,
       quest: wallet.quest,
       challenges,
       stoneIndex: wallet.stoneIndex,
@@ -346,11 +352,8 @@ export function WalletProvider({ children }: { children: ReactNode }) {
       applyClickResult: (result) => {
         setWallet((current) => ({
           ...current,
-          // Apply only the batch reward delta so per-second broom +N is not wiped.
-          coins:
-            result.rewards.credits > 0
-              ? addStones(current.coins, result.rewards.credits)
-              : current.coins,
+          // Server balance is the source of truth for online clicks.
+          coins: result.balance.credits,
           resources: result.balance.resources,
         }));
       },
@@ -422,6 +425,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
                 await equipTool(session.userId, product.productId);
                 inventory = await fetchInventory(session.userId);
               }
+              setServerClickPower(Math.max(0.1, purchased.clickPower || 1));
               setWallet((current) =>
                 applyInventory(
                   {
@@ -575,7 +579,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
         applyLocalClaim();
       },
     }),
-    [challenges, online, session, wallet],
+    [challenges, online, serverClickPower, session, wallet],
   );
 
   return <WalletContext.Provider value={value}>{children}</WalletContext.Provider>;

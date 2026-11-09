@@ -35,6 +35,7 @@ export function MineField({ onBreak }: MineFieldProps) {
     rewardClick,
     advanceStone,
     power,
+    serverClickPower,
     active,
     upgrades,
   } = useWallet();
@@ -163,7 +164,11 @@ export function MineField({ onBreak }: MineFieldProps) {
 
   const onMine = (event: MouseEvent<HTMLButtonElement>) => {
     const root = event.currentTarget.getBoundingClientRect();
-    const reward = clickReward(stoneIndex) * power;
+    const onlineMode = status === "online" && Boolean(session);
+    // Offline: local formula. Online: match backend ceil(clicks * clickPower) per click.
+    const reward = onlineMode
+      ? Math.max(1, Math.ceil(serverClickPower))
+      : clickReward(stoneIndex) * power;
     spawnFloaterAtClient(
       event.clientX,
       event.clientY,
@@ -174,7 +179,7 @@ export function MineField({ onBreak }: MineFieldProps) {
     setHit(true);
     window.setTimeout(() => setHit(false), 120);
 
-    if (status === "online" && session) {
+    if (onlineMode && session) {
       pendingRef.current += 1;
       setBlock((current) => ({
         ...current,

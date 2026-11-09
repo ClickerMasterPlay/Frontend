@@ -11,6 +11,8 @@ import type {
   InventoryMachine,
   InventoryPayload,
   InventoryTool,
+  LeaderboardEntry,
+  LeaderboardPayload,
   MachineCollectionResult,
   MachineStateResult,
   ProductType,
@@ -328,4 +330,47 @@ export async function claimChallenge(
     balance: parseBalance(raw.balance),
     challenges: parseChallengeList(asRecord(raw.challenges)),
   };
+}
+
+function parseLeaderboardEntry(value: unknown): LeaderboardEntry | null {
+  const raw = asRecord(value);
+  const userId = raw.userId == null ? "" : String(raw.userId);
+  if (!userId) {
+    return null;
+  }
+  return {
+    rank: Math.max(0, Math.floor(readNumber(raw.rank))),
+    userId,
+    displayName: typeof raw.displayName === "string" ? raw.displayName : null,
+    score: readNumber(raw.score),
+    credits: readNumber(raw.credits),
+    totalResourcesValue: readNumber(raw.totalResourcesValue),
+    clickPower: readNumber(raw.clickPower, 1),
+  };
+}
+
+export async function fetchLeaderboard(
+  userId: string,
+  top = 100,
+): Promise<LeaderboardPayload> {
+  const raw = await api<RawAuth>(`/api/v1/leaderboard?top=${Math.max(1, Math.min(100, top))}`, {
+    userId,
+  });
+  const topList = (Array.isArray(raw.top) ? raw.top : []).flatMap((item) => {
+    const entry = parseLeaderboardEntry(item);
+    return entry ? [entry] : [];
+  });
+  const me = parseLeaderboardEntry(raw.me);
+  return {
+    top: topList,
+    me,
+    totalPlayers: readNumber(raw.totalPlayers, topList.length),
+  };
+}
+
+export async function refreshLeaderboard(userId: string): Promise<void> {
+  await api<RawAuth>("/api/v1/leaderboard/refresh", {
+    method: "POST",
+    userId,
+  });
 }

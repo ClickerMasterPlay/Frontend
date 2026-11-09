@@ -7,17 +7,11 @@ import { useWallet } from "../wallet/WalletContext";
 import { QuestBoard } from "./QuestBoard";
 import { InventoryPanel } from "./InventoryPanel";
 import { MineField } from "./MineField";
+import { RatingBoard } from "./RatingBoard";
 import { ShopBoard } from "./ShopBoard";
 import { ResourceStub } from "./ResourceStub";
 import "./TitleScreen.css";
 import "./GameScreen.css";
-
-const STUB_PLAYERS = [
-  { name: "Miner_7", score: "1280" },
-  { name: "Guest_42", score: "910" },
-  { name: "Cobble", score: "640" },
-  { name: "Rookie", score: "220" },
-];
 
 type GameTab = "shop" | "rating" | "quests";
 
@@ -161,20 +155,7 @@ export function GameScreen({ onSettings, onProfile }: GameScreenProps) {
           <div className="game__panel-body">
             {tab === "shop" ? <ShopBoard /> : null}
 
-            {tab === "rating" ? (
-              <ol className="game__rating-list">
-                {STUB_PLAYERS.map((player) => (
-                  <li key={player.name}>
-                    <span>{player.name}</span>
-                    <span>{player.score}</span>
-                  </li>
-                ))}
-                <li className="game__rating-you">
-                  <span>{t("you")}</span>
-                  <span>{t("ratingEmptyScore")}</span>
-                </li>
-              </ol>
-            ) : null}
+            {tab === "rating" ? <RatingBoard /> : null}
 
             {tab === "quests" ? <QuestBoard /> : null}
           </div>
