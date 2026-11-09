@@ -188,6 +188,12 @@ export function visibleQuests(claimed: number[]): QuestDef[] {
   return QUESTS.filter((quest) => !done.has(quest.index)).slice(0, VISIBLE_QUESTS);
 }
 
+/** All unfinished quests (for scrollable board). */
+export function openQuests(claimed: number[]): QuestDef[] {
+  const done = new Set(claimed);
+  return QUESTS.filter((quest) => !done.has(quest.index));
+}
+
 function ruCount(value: number, one: string, few: string, many: string): string {
   const rounded = Math.abs(Math.floor(value));
   const mod100 = rounded % 100;

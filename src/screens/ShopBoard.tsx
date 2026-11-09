@@ -88,7 +88,7 @@ export function ShopBoard() {
                   slim
                   disabled={price === null || stones < (price ?? 0)}
                   onClick={() => {
-                    buyUpgrade(id);
+                    void buyUpgrade(id);
                   }}
                 >
                   {price === null ? t("shopMax") : level === 0 ? t("shopBuy") : t("shopUpgrade")}

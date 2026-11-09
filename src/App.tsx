@@ -27,7 +27,7 @@ function screenFromHash(): Screen {
 }
 
 function AppScreens() {
-  const { ensureGuest, busy } = useSession();
+  const { ensureGuest, busy, session, logout } = useSession();
   const [screen, setScreen] = useState<Screen>(screenFromHash);
   const [settingsFrom, setSettingsFrom] = useState<Screen>("title");
 
@@ -51,7 +51,10 @@ function AppScreens() {
           onToMenu={() => setScreen("title")}
         />
       ) : screen === "profile" ? (
-        <ProfileScreen onBack={() => setScreen("game")} />
+        <ProfileScreen
+          onBack={() => setScreen("game")}
+          onLogout={() => setScreen("title")}
+        />
       ) : screen === "game" ? (
         <GameScreen
           onSettings={() => openSettings("game")}
@@ -60,10 +63,15 @@ function AppScreens() {
       ) : (
         <TitleScreen
           starting={busy}
+          canQuit={Boolean(session)}
           onStart={() => {
             void ensureGuest().finally(() => setScreen("game"));
           }}
           onSettings={() => openSettings("title")}
+          onQuit={() => {
+            logout();
+            setScreen("title");
+          }}
         />
       )}
     </>

@@ -8,6 +8,7 @@ import {
   type BlockState,
 } from "../api/types";
 import { clickReward, formatStones, pieceCount, stoneKind } from "../game/levels";
+import { tierValue } from "../game/upgrades";
 import { useSession } from "../session/SessionContext";
 import { useSettings } from "../settings/SettingsContext";
 import { useWallet } from "../wallet/WalletContext";
@@ -34,29 +35,53 @@ export function MineField({ onBreak }: MineFieldProps) {
     rewardClick,
     advanceStone,
     power,
+    active,
+    upgrades,
   } = useWallet();
   const [, setBlock] = useState<BlockState>(DEFAULT_BLOCK);
   const [hit, setHit] = useState(false);
   const [floaters, setFloaters] = useState<Floater[]>([]);
+  const mineRef = useRef<HTMLDivElement | null>(null);
   const pendingRef = useRef(0);
   const flushTimer = useRef<number | null>(null);
   const lastFlush = useRef(0);
   const floaterId = useRef(0);
 
-  const spawnFloater = (clientX: number, clientY: number, root: DOMRect, text: string) => {
+  const autoRate =
+    active.includes("auto") && upgrades.auto > 0 ? tierValue("auto", upgrades.auto) : 0;
+
+  const spawnFloater = (x: number, y: number, text: string) => {
     const id = ++floaterId.current;
     setFloaters((current) => [
       ...current.slice(-12),
       {
         id,
-        x: clientX - root.left,
-        y: clientY - root.top,
+        x,
+        y,
         text,
       },
     ]);
     window.setTimeout(() => {
       setFloaters((current) => current.filter((item) => item.id !== id));
     }, 700);
+  };
+
+  const spawnFloaterAtClient = (clientX: number, clientY: number, root: DOMRect, text: string) => {
+    spawnFloater(clientX - root.left, clientY - root.top, text);
+  };
+
+  const spawnAutoFloater = (amount: number) => {
+    const root = mineRef.current?.getBoundingClientRect();
+    if (!root) {
+      return;
+    }
+    const jitterX = (Math.random() - 0.5) * 48;
+    const jitterY = (Math.random() - 0.5) * 36;
+    spawnFloater(
+      root.width / 2 + jitterX,
+      root.height / 2 + jitterY,
+      `+${formatStones(amount, settings.language === "ru")}`,
+    );
   };
 
   const applyLocalHit = () => {
@@ -124,36 +149,54 @@ export function MineField({ onBreak }: MineFieldProps) {
     };
   }, []);
 
+  useEffect(() => {
+    if (autoRate <= 0) {
+      return;
+    }
+    const amount = Math.round(autoRate);
+    const tick = () => {
+      spawnAutoFloater(amount);
+    };
+    const timer = window.setInterval(tick, 1000);
+    return () => window.clearInterval(timer);
+  }, [autoRate, settings.language]);
+
   const onMine = (event: MouseEvent<HTMLButtonElement>) => {
     const root = event.currentTarget.getBoundingClientRect();
     const reward = clickReward(stoneIndex) * power;
-    const text = `+${formatStones(reward, settings.language === "ru")}`;
-    spawnFloater(event.clientX, event.clientY, root, text);
+    spawnFloaterAtClient(
+      event.clientX,
+      event.clientY,
+      root,
+      `+${formatStones(reward, settings.language === "ru")}`,
+    );
     rewardClick(reward);
     setHit(true);
     window.setTimeout(() => setHit(false), 120);
-    if (status !== "online" || !session) {
-      applyLocalHit();
-      return;
-    }
-    pendingRef.current += 1;
-    setBlock((current) => ({
-      ...current,
-      currentHp: Math.max(0, current.currentHp - 1),
-    }));
-    if (pendingRef.current >= CLICK_BATCH_LIMIT) {
-      if (flushTimer.current !== null) {
-        window.clearTimeout(flushTimer.current);
-        flushTimer.current = null;
+
+    if (status === "online" && session) {
+      pendingRef.current += 1;
+      setBlock((current) => ({
+        ...current,
+        currentHp: Math.max(0, current.currentHp - 1),
+      }));
+      if (pendingRef.current >= CLICK_BATCH_LIMIT) {
+        if (flushTimer.current !== null) {
+          window.clearTimeout(flushTimer.current);
+          flushTimer.current = null;
+        }
+        void flushClicks();
+        return;
       }
-      void flushClicks();
+      scheduleFlush();
       return;
     }
-    scheduleFlush();
+
+    applyLocalHit();
   };
 
   return (
-    <div className="mine">
+    <div className="mine" ref={mineRef}>
       <StonePile
         key={stoneIndex}
         kind={stoneKind(stoneIndex)}

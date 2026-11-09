@@ -97,6 +97,23 @@
   gap: 8px;
 }
 
+.profile__logout {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  margin-top: 12px;
+}
+
+.profile__logout .mc-btn {
+  width: 100%;
+  min-width: 0;
+  --btn: #c8887c;
+  --btn-hi: #e8c2b8;
+  --btn-lo: #9a5a50;
+  --btn-ink: #fff8f5;
+  text-align: center;
+}
+
 .profile__error {
   margin: 0;
   color: #8a2a12;

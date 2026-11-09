@@ -33,6 +33,7 @@ type SessionContextValue = {
   ensureGuest: () => Promise<boolean>;
   login: (email: string, password: string) => Promise<boolean>;
   register: (email: string, password: string, displayName: string) => Promise<boolean>;
+  logout: () => void;
 };
 
 const SessionContext = createContext<SessionContextValue | null>(null);
@@ -137,6 +138,15 @@ export function SessionProvider({ children }: { children: ReactNode }) {
           setLastProgress(progress);
           return true;
         }),
+      logout: () => {
+        saveSession(null);
+        setSession(null);
+        setLastAuth(null);
+        setLastProgress(null);
+        setStatus("offline");
+        setError(null);
+        setBusy(false);
+      },
     }),
     [busy, error, lastAuth, lastProgress, ready, session, status],
   );

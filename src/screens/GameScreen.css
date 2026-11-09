@@ -331,6 +331,19 @@
   background: var(--paper-2);
 }
 
+.quest-row--done {
+  opacity: 0.62;
+}
+
+.quest-row__sentinel {
+  height: 1px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  list-style: none;
+}
+
 .quest-row__name,
 .quest-row__meta,
 .quest-row__left {

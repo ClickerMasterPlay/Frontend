@@ -4,10 +4,19 @@ import type {
   BalancePayload,
   BlockState,
   CatalogItem,
+  ChallengeClaimResult,
+  ChallengeItem,
+  ChallengeListPayload,
   ClickBatchResult,
+  InventoryMachine,
+  InventoryPayload,
+  InventoryTool,
+  MachineCollectionResult,
+  MachineStateResult,
   ProductType,
   ProgressPayload,
   PurchaseResult,
+  ToolEquipmentResult,
 } from "./types";
 
 type RawAuth = Record<string, unknown>;
@@ -135,5 +144,188 @@ export async function sendClickBatch(
     block: parseBlock(raw.block),
     rewards: parseBalance(raw.rewards),
     balance: parseBalance(raw.balance),
+  };
+}
+
+export async function fetchBalance(userId: string): Promise<BalancePayload> {
+  return parseBalance(await api<RawAuth>("/api/v1/economy/balance", { userId }));
+}
+
+function parseTool(value: unknown): InventoryTool | null {
+  const raw = asRecord(value);
+  if (typeof raw.toolCode !== "string") {
+    return null;
+  }
+  return {
+    toolCode: raw.toolCode,
+    powerMultiplier: readNumber(raw.powerMultiplier, 1),
+    equipped: Boolean(raw.equipped),
+    acquiredAt: typeof raw.acquiredAt === "string" ? raw.acquiredAt : null,
+  };
+}
+
+function parseMachine(value: unknown): InventoryMachine | null {
+  const raw = asRecord(value);
+  if (typeof raw.machineCode !== "string") {
+    return null;
+  }
+  return {
+    machineCode: raw.machineCode,
+    resourceCode: typeof raw.resourceCode === "string" ? raw.resourceCode : "stone",
+    productionPerHour: readNumber(raw.productionPerHour),
+    collectableAmount: readNumber(raw.collectableAmount),
+    installed: Boolean(raw.installed),
+    installedAt: typeof raw.installedAt === "string" ? raw.installedAt : null,
+    acquiredAt: typeof raw.acquiredAt === "string" ? raw.acquiredAt : null,
+    lastCollectedAt: typeof raw.lastCollectedAt === "string" ? raw.lastCollectedAt : null,
+  };
+}
+
+export async function fetchInventory(userId: string): Promise<InventoryPayload> {
+  const raw = await api<RawAuth>("/api/v1/inventory", { userId });
+  return {
+    tools: (Array.isArray(raw.tools) ? raw.tools : []).flatMap((item) => {
+      const tool = parseTool(item);
+      return tool ? [tool] : [];
+    }),
+    machines: (Array.isArray(raw.machines) ? raw.machines : []).flatMap((item) => {
+      const machine = parseMachine(item);
+      return machine ? [machine] : [];
+    }),
+  };
+}
+
+export async function collectMachines(userId: string): Promise<MachineCollectionResult> {
+  const raw = await api<RawAuth>("/api/v1/inventory/machines/collect", {
+    method: "POST",
+    userId,
+  });
+  return {
+    collectedResources: readResources(raw.collectedResources),
+    balance: parseBalance(raw.balance),
+    collectedAt: typeof raw.collectedAt === "string" ? raw.collectedAt : null,
+  };
+}
+
+export async function installMachine(
+  userId: string,
+  machineCode: string,
+): Promise<MachineStateResult> {
+  const raw = await api<RawAuth>(`/api/v1/inventory/machines/${machineCode}/install`, {
+    method: "POST",
+    userId,
+  });
+  return {
+    machineCode: String(raw.machineCode ?? machineCode),
+    installed: Boolean(raw.installed),
+    installedAt: typeof raw.installedAt === "string" ? raw.installedAt : null,
+    lastCollectedAt: typeof raw.lastCollectedAt === "string" ? raw.lastCollectedAt : null,
+    collectedResources: readResources(raw.collectedResources),
+    balance: parseBalance(raw.balance),
+  };
+}
+
+export async function uninstallMachine(
+  userId: string,
+  machineCode: string,
+): Promise<MachineStateResult> {
+  const raw = await api<RawAuth>(`/api/v1/inventory/machines/${machineCode}/uninstall`, {
+    method: "POST",
+    userId,
+  });
+  return {
+    machineCode: String(raw.machineCode ?? machineCode),
+    installed: Boolean(raw.installed),
+    installedAt: typeof raw.installedAt === "string" ? raw.installedAt : null,
+    lastCollectedAt: typeof raw.lastCollectedAt === "string" ? raw.lastCollectedAt : null,
+    collectedResources: readResources(raw.collectedResources),
+    balance: parseBalance(raw.balance),
+  };
+}
+
+export async function equipTool(
+  userId: string,
+  toolCode: string,
+): Promise<ToolEquipmentResult> {
+  const raw = await api<RawAuth>(`/api/v1/inventory/tools/${toolCode}/equip`, {
+    method: "POST",
+    userId,
+  });
+  return {
+    equippedToolCode: typeof raw.equippedToolCode === "string" ? raw.equippedToolCode : null,
+    baseClickPower: readNumber(raw.baseClickPower, 1),
+    toolMultiplier: readNumber(raw.toolMultiplier, 1),
+    effectiveClickPower: readNumber(raw.effectiveClickPower, 1),
+  };
+}
+
+export async function unequipTool(userId: string): Promise<ToolEquipmentResult> {
+  const raw = await api<RawAuth>("/api/v1/inventory/tools/equipped", {
+    method: "DELETE",
+    userId,
+  });
+  return {
+    equippedToolCode: typeof raw.equippedToolCode === "string" ? raw.equippedToolCode : null,
+    baseClickPower: readNumber(raw.baseClickPower, 1),
+    toolMultiplier: readNumber(raw.toolMultiplier, 1),
+    effectiveClickPower: readNumber(raw.effectiveClickPower, 1),
+  };
+}
+
+function parseChallengeItem(value: unknown): ChallengeItem | null {
+  const raw = asRecord(value);
+  if (typeof raw.index !== "number") {
+    return null;
+  }
+  return {
+    index: raw.index,
+    kind: typeof raw.kind === "string" ? raw.kind : "",
+    goal: readNumber(raw.goal),
+    reward: readNumber(raw.reward),
+    current: readNumber(raw.current),
+    ready: Boolean(raw.ready),
+  };
+}
+
+function parseChallengeList(raw: RawAuth): ChallengeListPayload {
+  const stats = asRecord(raw.stats);
+  return {
+    items: (Array.isArray(raw.items) ? raw.items : []).flatMap((item) => {
+      const row = parseChallengeItem(item);
+      return row ? [row] : [];
+    }),
+    claimed: Array.isArray(raw.claimed)
+      ? raw.claimed.filter((value): value is number => typeof value === "number")
+      : [],
+    total: readNumber(raw.total),
+    stats: {
+      clicks: readNumber(stats.clicks),
+      blocksBroken: readNumber(stats.blocksBroken),
+      earned: readNumber(stats.earned),
+      spent: readNumber(stats.spent),
+      buys: readNumber(stats.buys),
+      level: readNumber(stats.level),
+      power: readNumber(stats.power, 1),
+    },
+  };
+}
+
+export async function fetchChallenges(userId: string): Promise<ChallengeListPayload> {
+  return parseChallengeList(await api<RawAuth>("/api/v1/challenges", { userId }));
+}
+
+export async function claimChallenge(
+  userId: string,
+  challengeIndex: number,
+): Promise<ChallengeClaimResult> {
+  const raw = await api<RawAuth>(`/api/v1/challenges/${challengeIndex}/claim`, {
+    method: "POST",
+    userId,
+  });
+  return {
+    challengeIndex: readNumber(raw.challengeIndex, challengeIndex),
+    reward: readNumber(raw.reward),
+    balance: parseBalance(raw.balance),
+    challenges: parseChallengeList(asRecord(raw.challenges)),
   };
 }

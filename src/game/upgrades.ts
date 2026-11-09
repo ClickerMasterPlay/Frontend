@@ -23,6 +23,7 @@ const PICK_COEFF = {
 } as const;
 
 const CLICK_BONUS = [0.5, 2.5, 5] as const;
+/** Stones (currency) per second while the broom is active. */
 const AUTO_RATES = [10, 50, 200] as const;
 
 const LEGACY_IDS: Record<string, UpgradeId> = {
@@ -138,19 +139,20 @@ export function accrueAuto<T extends AutoWallet>(wallet: T, now: number): T {
   if (!running) {
     return wallet;
   }
-  const rate = tierValue("auto", wallet.upgrades.auto);
+  const rate = Math.round(tierValue("auto", wallet.upgrades.auto));
   const start = wallet.autoAt > 0 ? wallet.autoAt : now;
   const elapsed = Math.max(0, now - start);
-  const gain = (elapsed / 3_600_000) * rate + wallet.autoBank;
-  const pay = Math.floor(gain * 100) / 100;
-  if (pay <= 0) {
-    return wallet.autoAt > 0 ? wallet : { ...wallet, autoAt: now };
+  const seconds = Math.floor(elapsed / 1000);
+  if (seconds < 1) {
+    return wallet.autoAt > 0 ? wallet : { ...wallet, autoAt: now, autoBank: 0 };
   }
+  // Exactly +rate whole stones for each full second, nothing fractional.
+  const pay = seconds * rate;
   return {
     ...wallet,
     coins: addStones(wallet.coins, pay),
-    autoBank: Math.round((gain - pay) * 1000) / 1000,
-    autoAt: now,
+    autoBank: 0,
+    autoAt: start + seconds * 1000,
   };
 }
 

@@ -12,7 +12,7 @@ export class BackendError extends Error {
 const API_BASE = import.meta.env.VITE_API_BASE ?? "";
 
 type ApiOptions = {
-  method?: "GET" | "POST";
+  method?: "GET" | "POST" | "DELETE";
   userId?: string | null;
   idempotencyKey?: string;
   body?: unknown;

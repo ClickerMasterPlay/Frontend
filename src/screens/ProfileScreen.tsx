@@ -10,18 +10,19 @@ import "./ProfileScreen.css";
 
 type ProfileScreenProps = {
   onBack: () => void;
+  onLogout?: () => void;
 };
 
-export function ProfileScreen({ onBack }: ProfileScreenProps) {
+export function ProfileScreen({ onBack, onLogout }: ProfileScreenProps) {
   const { t, settings } = useSettings();
   const { stones, blocksBroken, power, owned } = useWallet();
-  const { session, busy, error, login, register } = useSession();
+  const { session, busy, error, login, register, logout } = useSession();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [displayName, setDisplayName] = useState("");
 
+  const signedIn = Boolean(session && !session.isGuest);
   const name = session?.displayName || t("guestName");
-  const mode = session && !session.isGuest ? t("registeredMode") : t("guestMode");
+  const mode = signedIn ? t("registeredMode") : t("guestMode");
   const achievements = [
     { key: "achGuest" as const, done: true },
     { key: "achFirstClick" as const, done: blocksBroken > 0 || power > 1 },
@@ -59,68 +60,71 @@ export function ProfileScreen({ onBack }: ProfileScreenProps) {
             </ul>
           </div>
 
-          <form
-            className="profile__form"
-            onSubmit={(event) => {
-              event.preventDefault();
-              void login(email, password);
-            }}
-          >
-            <p className="profile__achs-title">{t("account")}</p>
-            <label className="profile__field">
-              <span>{t("email")}</span>
-              <input
-                type="email"
-                autoComplete="username"
-                value={email}
-                onChange={(event) => setEmail(event.target.value)}
-              />
-            </label>
-            <label className="profile__field">
-              <span>{t("password")}</span>
-              <input
-                type="password"
-                autoComplete="current-password"
-                minLength={8}
-                value={password}
-                onChange={(event) => setPassword(event.target.value)}
-              />
-            </label>
-            {session?.isGuest !== false ? (
+          {signedIn ? null : (
+            <form
+              className="profile__form"
+              onSubmit={(event) => {
+                event.preventDefault();
+                void login(email, password);
+              }}
+            >
+              <p className="profile__achs-title">{t("account")}</p>
               <label className="profile__field">
-                <span>{t("displayName")}</span>
+                <span>{t("email")}</span>
                 <input
-                  type="text"
-                  maxLength={100}
-                  value={displayName}
-                  onChange={(event) => setDisplayName(event.target.value)}
+                  type="email"
+                  autoComplete="username"
+                  value={email}
+                  onChange={(event) => setEmail(event.target.value)}
                 />
               </label>
-            ) : null}
-            {error ? <p className="profile__error">{error}</p> : null}
-            <div className="profile__form-actions">
-              <McButton
-                slim
-                disabled={busy || !email || !password}
-                onClick={() => {
-                  void login(email, password);
-                }}
-              >
-                {t("login")}
-              </McButton>
-              {session?.isGuest !== false ? (
+              <label className="profile__field">
+                <span>{t("password")}</span>
+                <input
+                  type="password"
+                  autoComplete="current-password"
+                  minLength={8}
+                  value={password}
+                  onChange={(event) => setPassword(event.target.value)}
+                />
+              </label>
+              {error ? <p className="profile__error">{error}</p> : null}
+              <div className="profile__form-actions">
+                <McButton
+                  slim
+                  disabled={busy || !email || !password}
+                  onClick={() => {
+                    void login(email, password);
+                  }}
+                >
+                  {t("login")}
+                </McButton>
                 <McButton
                   slim
                   disabled={busy || !email || password.length < 8}
                   onClick={() => {
-                    void register(email, password, displayName);
+                    void register(email, password, "");
                   }}
                 >
                   {t("register")}
                 </McButton>
-              ) : null}
+              </div>
+            </form>
+          )}
+
+          {signedIn ? (
+            <div className="profile__logout">
+              <McButton
+                wide
+                onClick={() => {
+                  logout();
+                  onLogout?.();
+                }}
+              >
+                {t("quit")}
+              </McButton>
             </div>
-          </form>
+          ) : null}
 
           <section className="profile__achs" aria-label={t("achievements")}>
             <p className="profile__achs-title">{t("achievements")}</p>

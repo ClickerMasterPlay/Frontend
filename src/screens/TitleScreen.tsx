@@ -29,10 +29,18 @@ const SPLASHES = {
 type TitleScreenProps = {
   onStart: () => void;
   onSettings: () => void;
+  onQuit?: () => void;
   starting?: boolean;
+  canQuit?: boolean;
 };
 
-export function TitleScreen({ onStart, onSettings, starting = false }: TitleScreenProps) {
+export function TitleScreen({
+  onStart,
+  onSettings,
+  onQuit,
+  starting = false,
+  canQuit = false,
+}: TitleScreenProps) {
   const { t, settings } = useSettings();
   const splash = useMemo(() => {
     const list = SPLASHES[settings.language];
@@ -61,7 +69,9 @@ export function TitleScreen({ onStart, onSettings, starting = false }: TitleScre
           </McButton>
           <div className="menu__row">
             <McButton onClick={onSettings}>{t("settings")}</McButton>
-            <McButton disabled>{t("quit")}</McButton>
+            <McButton disabled={!canQuit} onClick={onQuit}>
+              {t("quit")}
+            </McButton>
           </div>
         </nav>
       </div>

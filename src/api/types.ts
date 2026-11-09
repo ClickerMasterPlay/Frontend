@@ -49,6 +49,82 @@ export type PurchaseResult = {
   clickPower: number;
 };
 
+export type InventoryTool = {
+  toolCode: string;
+  powerMultiplier: number;
+  equipped: boolean;
+  acquiredAt: string | null;
+};
+
+export type InventoryMachine = {
+  machineCode: string;
+  resourceCode: string;
+  productionPerHour: number;
+  collectableAmount: number;
+  installed: boolean;
+  installedAt: string | null;
+  acquiredAt: string | null;
+  lastCollectedAt: string | null;
+};
+
+export type InventoryPayload = {
+  tools: InventoryTool[];
+  machines: InventoryMachine[];
+};
+
+export type MachineCollectionResult = {
+  collectedResources: Record<string, number>;
+  balance: BalancePayload;
+  collectedAt: string | null;
+};
+
+export type MachineStateResult = {
+  machineCode: string;
+  installed: boolean;
+  installedAt: string | null;
+  lastCollectedAt: string | null;
+  collectedResources: Record<string, number>;
+  balance: BalancePayload;
+};
+
+export type ToolEquipmentResult = {
+  equippedToolCode: string | null;
+  baseClickPower: number;
+  toolMultiplier: number;
+  effectiveClickPower: number;
+};
+
+export type ChallengeItem = {
+  index: number;
+  kind: string;
+  goal: number;
+  reward: number;
+  current: number;
+  ready: boolean;
+};
+
+export type ChallengeListPayload = {
+  items: ChallengeItem[];
+  claimed: number[];
+  total: number;
+  stats: {
+    clicks: number;
+    blocksBroken: number;
+    earned: number;
+    spent: number;
+    buys: number;
+    level: number;
+    power: number;
+  };
+};
+
+export type ChallengeClaimResult = {
+  challengeIndex: number;
+  reward: number;
+  balance: BalancePayload;
+  challenges: ChallengeListPayload;
+};
+
 export const FALLBACK_CATALOG: CatalogItem[] = [
   {
     productType: "CLICK_UPGRADE",
