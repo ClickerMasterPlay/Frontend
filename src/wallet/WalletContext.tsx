@@ -19,7 +19,12 @@ import {
   uninstallMachine,
 } from "../api/backend";
 import { BackendError } from "../api/client";
-import { productForUpgrade, upgradeForProduct } from "../api/productMap";
+import {
+  autoLevelFromMachines,
+  clickLevelFromPower,
+  productForUpgrade,
+  upgradeForProduct,
+} from "../api/productMap";
 import type {
   ChallengeListPayload,
   ClickBatchResult,
@@ -39,6 +44,7 @@ import {
   ownedIds,
   strikePower,
   type UpgradeId,
+  type UpgradeLevels,
 } from "../game/upgrades";
 import { useSession } from "../session/SessionContext";
 import { emptyWallet, loadWallet, saveWallet, type WalletState } from "./wallet";
@@ -54,7 +60,7 @@ type WalletContextValue = {
   equippedToolCode: string | null;
   upgrades: WalletState["upgrades"];
   power: number;
-  /** Backend base clickPower used for credit formula: ceil(clicks * clickPower). */
+  /** Backend clickPower used for credit formula: base * clickPower * tool. */
   serverClickPower: number;
   quest: WalletState["quest"];
   challenges: ChallengeListPayload | null;
@@ -70,10 +76,26 @@ type WalletContextValue = {
 
 const WalletContext = createContext<WalletContextValue | null>(null);
 
-function applyInventory(current: WalletState, inventory: InventoryPayload): WalletState {
-  const upgrades = { ...current.upgrades };
+function applyInventory(
+  current: WalletState,
+  inventory: InventoryPayload,
+  clickPower?: number,
+): WalletState {
+  // Online inventory is source of truth for tools/machines — drop local ghost ownership.
+  const upgrades: UpgradeLevels = {
+    ...current.upgrades,
+    wood: 0,
+    iron: 0,
+    gold: 0,
+    auto: autoLevelFromMachines(inventory.machines.map((item) => item.machineCode)),
+    click:
+      typeof clickPower === "number"
+        ? clickLevelFromPower(clickPower)
+        : current.upgrades.click,
+  };
+  // Keep only click upgrade from local active; pickaxes/machines come from inventory.
   const nextActive = new Set<string>(
-    current.active.filter((id) => id === "click" || id === "gold"),
+    current.active.filter((id) => id === "click"),
   );
   let equippedToolCode: string | null = null;
 
@@ -90,13 +112,9 @@ function applyInventory(current: WalletState, inventory: InventoryPayload): Wall
   }
 
   for (const machine of inventory.machines) {
-    const upgrade = upgradeForProduct(machine.machineCode);
-    if (!upgrade) {
-      continue;
-    }
-    upgrades[upgrade] = Math.max(upgrades[upgrade], 1);
     if (machine.installed) {
-      nextActive.add(upgrade);
+      nextActive.add("auto");
+      break;
     }
   }
 
@@ -167,8 +185,8 @@ export function WalletProvider({ children }: { children: ReactNode }) {
       coins: lastProgress.credits,
       resources: lastProgress.resources,
       equippedToolCode: lastProgress.equippedToolCode
-        ? upgradeForProduct(lastProgress.equippedToolCode) ?? current.equippedToolCode
-        : current.equippedToolCode,
+        ? upgradeForProduct(lastProgress.equippedToolCode) ?? null
+        : null,
     }));
   }, [lastProgress]);
 
@@ -208,6 +226,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
               },
             },
             inventory,
+            progress.clickPower,
           ),
         );
         setChallenges(challengeList);
@@ -303,6 +322,8 @@ export function WalletProvider({ children }: { children: ReactNode }) {
               applyLocalToggle();
               return;
             }
+            const previousActive = wallet.active;
+            const previousEquipped = wallet.equippedToolCode;
             applyLocalToggle();
             void (on ? unequipTool(session.userId) : equipTool(session.userId, product.productId))
               .then((result) => {
@@ -321,7 +342,14 @@ export function WalletProvider({ children }: { children: ReactNode }) {
                   };
                 });
               })
-              .catch(() => undefined);
+              .catch(() => {
+                // Equip/unequip rejected (e.g. tool not owned) — revert optimistic local state.
+                setWallet((current) => ({
+                  ...current,
+                  active: previousActive,
+                  equippedToolCode: previousEquipped,
+                }));
+              });
             return;
           }
           if (id === "auto") {
@@ -407,8 +435,8 @@ export function WalletProvider({ children }: { children: ReactNode }) {
           return "poor";
         }
 
-        if (online && session && level === 0) {
-          const product = productForUpgrade(id);
+        if (online && session) {
+          const product = productForUpgrade(id, level);
           if (product) {
             try {
               const purchased = await purchaseItem(
@@ -439,6 +467,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
                     },
                   },
                   inventory,
+                  purchased.clickPower,
                 ),
               );
               if (session) {
@@ -460,18 +489,30 @@ export function WalletProvider({ children }: { children: ReactNode }) {
                     await equipTool(session.userId, product.productId).catch(() => undefined);
                     inventory = await fetchInventory(session.userId);
                   }
-                  setWallet((current) => applyInventory(current, inventory));
+                  const progress = await fetchProgress(session.userId);
+                  setServerClickPower(Math.max(0.1, progress.clickPower || 1));
+                  setWallet((current) =>
+                    applyInventory(
+                      {
+                        ...current,
+                        coins: progress.credits,
+                        resources: progress.resources,
+                      },
+                      inventory,
+                      progress.clickPower,
+                    ),
+                  );
                   return "ok";
                 } catch {
-                  // Fall through to local purchase below.
+                  return "poor";
                 }
               }
-              // Local stones can be ahead of server credits — still allow the buy locally.
-              if (code !== "INSUFFICIENT_FUNDS" && code !== "PRODUCT_ALREADY_OWNED" && code !== "") {
-                // Unknown server error: still try local path below.
-              }
+              // Online purchases must stay on the server — no local ghost ownership.
+              return "poor";
             }
           }
+          // No backend product for this tier (e.g. tool already owned) — don't fake local upgrade.
+          return "owned";
         }
 
         setWallet((current) => {

@@ -8,21 +8,24 @@ export type UpgradeLevels = Record<UpgradeId, number>;
 
 const MAX_LEVEL = 3;
 
+/** Prices aligned with backend ProductCatalogService. */
 const PRICES: Record<UpgradeId, readonly number[]> = {
-  wood: [250, 500, 1000],
-  iron: [3000, 5000, 10000],
-  gold: [20000, 50000, 100000],
-  click: [100, 1000, 5000],
-  auto: [1500, 5000, 10000],
+  wood: [250],
+  iron: [800],
+  gold: [3000],
+  click: [100, 500, 2000],
+  auto: [1500, 6000, 25000],
 };
 
+/** Tool multipliers from backend catalog (one tier each). */
 const PICK_COEFF = {
-  wood: [1.2, 1.5, 1.7],
-  iron: [2, 2.5, 3],
-  gold: [5, 10, 25],
+  wood: [1.2],
+  iron: [1.8],
+  gold: [3.0],
 } as const;
 
-const CLICK_BONUS = [0.5, 2.5, 5] as const;
+/** Per-tier clickPower increase from backend click_power_1/2/3. */
+const CLICK_BONUS = [0.5, 1.0, 2.0] as const;
 /** Stones (currency) per second while the broom is active. */
 const AUTO_RATES = [10, 50, 200] as const;
 
@@ -88,25 +91,42 @@ export function ownedIds(levels: UpgradeLevels): string[] {
   return UPGRADE_IDS.filter((id) => levels[id] > 0);
 }
 
+export function upgradeMaxLevel(id: UpgradeId): number {
+  return PRICES[id].length;
+}
+
 export function nextPrice(id: UpgradeId, level: number): number | null {
-  if (level < 0 || level >= MAX_LEVEL) {
+  const prices = PRICES[id];
+  if (level < 0 || level >= prices.length) {
     return null;
   }
-  return PRICES[id][level];
+  return prices[level];
 }
 
 export function tierValue(id: UpgradeId, level: number): number {
   if (level <= 0) {
     return 0;
   }
-  const index = Math.min(MAX_LEVEL, level) - 1;
   if (id === "click") {
+    const index = Math.min(CLICK_BONUS.length, level) - 1;
     return CLICK_BONUS[index];
   }
   if (id === "auto") {
+    const index = Math.min(AUTO_RATES.length, level) - 1;
     return AUTO_RATES[index];
   }
-  return PICK_COEFF[id][index];
+  const coeffs = PICK_COEFF[id];
+  const index = Math.min(coeffs.length, level) - 1;
+  return coeffs[index];
+}
+
+/** Cumulative clickPower after owning `level` click upgrades (base 1.0). */
+export function clickPowerFromLevel(level: number): number {
+  let power = 1;
+  for (let i = 0; i < Math.max(0, level) && i < CLICK_BONUS.length; i += 1) {
+    power += CLICK_BONUS[i];
+  }
+  return Math.round(power * 100) / 100;
 }
 
 export function strikePower(

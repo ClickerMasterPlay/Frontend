@@ -7,6 +7,7 @@ import {
   DEFAULT_BLOCK,
   type BlockState,
 } from "../api/types";
+import { rewardPerClick, toolMultiplierFor } from "../game/clickRewards";
 import { clickReward, formatStones, pieceCount, stoneKind } from "../game/levels";
 import { tierValue } from "../game/upgrades";
 import { useSession } from "../session/SessionContext";
@@ -38,8 +39,9 @@ export function MineField({ onBreak }: MineFieldProps) {
     serverClickPower,
     active,
     upgrades,
+    equippedToolCode,
   } = useWallet();
-  const [, setBlock] = useState<BlockState>(DEFAULT_BLOCK);
+  const [block, setBlock] = useState<BlockState>(DEFAULT_BLOCK);
   const [hit, setHit] = useState(false);
   const [floaters, setFloaters] = useState<Floater[]>([]);
   const mineRef = useRef<HTMLDivElement | null>(null);
@@ -165,9 +167,14 @@ export function MineField({ onBreak }: MineFieldProps) {
   const onMine = (event: MouseEvent<HTMLButtonElement>) => {
     const root = event.currentTarget.getBoundingClientRect();
     const onlineMode = status === "online" && Boolean(session);
-    // Offline: local formula. Online: match backend ceil(clicks * clickPower) per click.
+    // Online: same formula as backend GameService (base * clickPower * tool).
     const reward = onlineMode
-      ? Math.max(1, Math.ceil(serverClickPower))
+      ? rewardPerClick({
+          blockType: block.type,
+          maxHp: block.maxHp,
+          toolMultiplier: toolMultiplierFor(upgrades, active, equippedToolCode),
+          clickPower: serverClickPower,
+        })
       : clickReward(stoneIndex) * power;
     spawnFloaterAtClient(
       event.clientX,
