@@ -148,7 +148,8 @@ export function WalletProvider({ children }: { children: ReactNode }) {
   }, [ready, wallet]);
 
   useEffect(() => {
-    if (!ready) {
+    // Offline-only local broom. Online auto comes from machines/collect.
+    if (!ready || online) {
       return;
     }
     const tick = () => {
@@ -170,10 +171,9 @@ export function WalletProvider({ children }: { children: ReactNode }) {
         };
       });
     };
-    // One whole +N tick per second (matches floater).
     const timer = window.setInterval(tick, 1000);
     return () => window.clearInterval(timer);
-  }, [ready]);
+  }, [ready, online]);
 
   useEffect(() => {
     if (!lastProgress) {
@@ -251,14 +251,16 @@ export function WalletProvider({ children }: { children: ReactNode }) {
         .then((result) => {
           setWallet((current) => ({
             ...current,
-            // Machines pay resources; do not clobber per-second broom coins.
+            // Never snap credits down on an empty/stale collect; only move forward.
+            coins: Math.max(current.coins, result.balance.credits),
             resources: result.balance.resources,
           }));
         })
         .catch(() => undefined);
     };
     tick();
-    const timer = window.setInterval(tick, 15000);
+    // Matches intended credit tick (~10/sec once BE pays credits independently of stone).
+    const timer = window.setInterval(tick, 1000);
     return () => window.clearInterval(timer);
   }, [online, session?.userId, wallet.active]);
 
@@ -380,8 +382,11 @@ export function WalletProvider({ children }: { children: ReactNode }) {
       applyClickResult: (result) => {
         setWallet((current) => ({
           ...current,
-          // Server balance is the source of truth for online clicks.
-          coins: result.balance.credits,
+          // Apply this batch's click rewards, and never snap below the server balance.
+          coins: Math.max(
+            addStones(current.coins, result.rewards.credits),
+            result.balance.credits,
+          ),
           resources: result.balance.resources,
         }));
       },
