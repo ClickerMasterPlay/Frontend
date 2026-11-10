@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { McButton } from "../components/McButton";
+import { ResourceIcon } from "../components/ResourceIcon";
 import type { ChallengeListPayload } from "../api/types";
 import { formatStones } from "../game/levels";
 import {
@@ -174,9 +175,14 @@ export function QuestBoard() {
                 )}
               </p>
               <p className="quest-row__meta">
-                {item.claimed
-                  ? t("questClaimed")
-                  : `${t("questReward")}: ${formatStones(item.reward, russian)} ${t("stonesShort")}`}
+                {item.claimed ? (
+                  t("questClaimed")
+                ) : (
+                  <span className="res-inline">
+                    {t("questReward")}: {formatStones(item.reward, russian)}
+                    <ResourceIcon kind="stone" size={20} />
+                  </span>
+                )}
               </p>
               <div className="quest-row__bar" aria-hidden="true">
                 <span style={{ width: `${width}%` }} />

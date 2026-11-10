@@ -1,0 +1,13 @@
+.res-icon {
+  display: inline-block;
+  object-fit: contain;
+  image-rendering: pixelated;
+  vertical-align: middle;
+  flex: none;
+}
+
+.res-inline {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}

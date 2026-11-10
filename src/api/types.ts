@@ -25,6 +25,22 @@ export type BalancePayload = {
   resources: Record<string, number>;
 };
 
+export type DailyRewardStatus = {
+  available: boolean;
+  cycleDay: number;
+  reward: Record<string, number>;
+  serverDate: string;
+  nextResetAt: string;
+};
+
+export type DailyRewardClaim = {
+  cycleDay: number;
+  grantedResources: Record<string, number>;
+  resources: Record<string, number>;
+  nextCycleDay: number;
+  nextAvailableAt: string;
+};
+
 export type BlockState = {
   type: string;
   rarity: string;

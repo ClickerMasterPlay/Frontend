@@ -1,0 +1,377 @@
+.daily {
+  position: fixed;
+  inset: 0;
+  z-index: 30;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding:
+    max(16px, env(safe-area-inset-top))
+    max(16px, env(safe-area-inset-right))
+    max(16px, env(safe-area-inset-bottom))
+    max(16px, env(safe-area-inset-left));
+  overflow: auto;
+  background: rgba(8, 16, 10, 0.62);
+}
+
+.daily__sheet {
+  width: min(840px, 100%);
+  margin-block: auto;
+  flex: none;
+  padding: 16px 16px 14px;
+  border: 3px solid var(--edge);
+  border-radius: 12px;
+  background: var(--paper);
+  box-shadow: 4px 4px 0 var(--edge);
+}
+
+.daily__title {
+  margin: 0 0 14px;
+  font-family: Comfortaa, Nunito, sans-serif;
+  font-size: 32px;
+  font-weight: 700;
+  line-height: 1.1;
+  text-align: center;
+}
+
+.daily__next {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin: 0 0 14px;
+  color: var(--ink-soft);
+  font-size: 15px;
+  font-weight: 800;
+}
+
+.daily__clock {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 8px 3px 6px;
+  border: 3px solid var(--edge);
+  border-radius: 999px;
+  background: var(--paper-2);
+  color: var(--ink);
+  box-shadow: 2px 2px 0 var(--edge);
+}
+
+.daily__board {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 196px;
+  gap: 10px;
+  align-items: stretch;
+}
+
+.daily__days {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.daily__day {
+  display: flex;
+  flex-direction: column;
+  min-height: 176px;
+  border: 3px solid var(--edge);
+  border-radius: 10px;
+  background: var(--paper-2);
+  box-shadow: 3px 3px 0 var(--edge);
+  overflow: hidden;
+}
+
+.daily__cap {
+  margin: 0;
+  padding: 4px 6px;
+  background: #e7d7c2;
+  color: var(--ink);
+  font-size: 14px;
+  font-weight: 800;
+  text-align: center;
+}
+
+.daily__day--done .daily__cap {
+  background: #c6e59a;
+}
+
+.daily__day--today {
+  background: #fffdf6;
+  box-shadow: 3px 3px 0 #8a5a12, inset 0 0 0 2px var(--gold);
+}
+
+.daily__day--today .daily__cap {
+  background: var(--gold);
+}
+
+.daily__body {
+  display: flex;
+  flex: 1;
+  flex-direction: row;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 4px 10px;
+}
+
+.daily__body--pair {
+  align-items: center;
+}
+
+.daily__prize {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  min-width: 0;
+}
+
+.daily__prize .res-icon {
+  width: 108px;
+  height: 86px;
+}
+
+.daily__body--pair .res-icon {
+  width: 78px;
+  height: 68px;
+}
+
+.daily__amount {
+  font-size: 18px;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.daily__finale {
+  display: flex;
+  flex-direction: column;
+  border: 3px solid var(--edge);
+  border-radius: 10px;
+  background: #fff4d2;
+  box-shadow: 3px 3px 0 var(--edge), inset 0 0 0 3px var(--gold-hi);
+  overflow: hidden;
+}
+
+.daily__finale--today {
+  box-shadow: 3px 3px 0 #8a5a12, inset 0 0 0 2px var(--gold);
+}
+
+.daily__finale--done {
+  background: #e7f3d4;
+}
+
+.daily__finale--done .daily__finale-cap {
+  background: #c6e59a;
+}
+
+.daily__finale-cap {
+  margin: 0;
+  padding: 8px 8px 6px;
+  background: var(--gold);
+  border-bottom: 3px solid var(--edge);
+  font-family: Comfortaa, Nunito, sans-serif;
+  font-size: 22px;
+  text-align: center;
+}
+
+.daily__finale-body {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 8px 12px;
+}
+
+.daily__finale .res-icon {
+  width: 120px;
+  height: 104px;
+}
+
+.daily__finale .daily__amount {
+  font-size: 22px;
+}
+
+.daily__track {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: center;
+  margin-top: 14px;
+}
+
+.daily__track-label {
+  font-size: 15px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.daily__bar {
+  height: 22px;
+  border: 3px solid var(--edge);
+  border-radius: 999px;
+  background: var(--paper-2);
+  box-shadow: 2px 2px 0 var(--edge);
+  overflow: hidden;
+}
+
+.daily__fill {
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(#e7ffb0, var(--btn) 45%, var(--btn-lo));
+}
+
+.daily__goal {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 16px;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.daily__goal .res-icon {
+  width: 28px;
+  height: 28px;
+}
+
+.daily__error {
+  margin: 12px 0 0;
+  color: #8a3b22;
+  font-size: 14px;
+  font-weight: 800;
+  text-align: center;
+}
+
+.daily__claim {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: min(280px, 100%);
+  height: 46px;
+  margin: 12px auto 0;
+  border: 3px solid var(--edge);
+  border-radius: 10px;
+  background: var(--btn);
+  color: var(--btn-ink);
+  font-family: inherit;
+  font-size: 18px;
+  font-weight: 800;
+  box-shadow: inset 0 3px 0 var(--btn-hi), inset 0 -3px 0 var(--btn-lo), 3px 3px 0 var(--edge);
+  cursor: pointer;
+}
+
+.daily__claim:disabled {
+  cursor: default;
+  filter: saturate(0.7);
+}
+
+@media (max-width: 720px) {
+  .daily {
+    padding:
+      max(8px, env(safe-area-inset-top))
+      max(8px, env(safe-area-inset-right))
+      max(8px, env(safe-area-inset-bottom))
+      max(8px, env(safe-area-inset-left));
+  }
+
+  .daily__sheet {
+    padding: 12px 10px 10px;
+  }
+
+  .daily__title {
+    margin-bottom: 10px;
+    font-size: 24px;
+  }
+
+  .daily__next {
+    margin-bottom: 10px;
+    font-size: 13px;
+  }
+
+  .daily__board {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .daily__days {
+    gap: 8px;
+  }
+
+  .daily__day {
+    min-height: 0;
+  }
+
+  .daily__cap {
+    padding: 3px 4px;
+    font-size: 12px;
+  }
+
+  .daily__body {
+    gap: 4px;
+    padding: 6px 2px 8px;
+  }
+
+  .daily__prize .res-icon,
+  .daily__finale .res-icon {
+    width: 52px;
+    height: 44px;
+  }
+
+  .daily__body--pair .res-icon {
+    width: 36px;
+    height: 32px;
+  }
+
+  .daily__amount {
+    font-size: 15px;
+  }
+
+  .daily__finale-cap {
+    padding: 4px 6px;
+    font-size: 16px;
+  }
+
+  .daily__finale-body {
+    flex-direction: row;
+    gap: 18px;
+    padding: 8px 8px 10px;
+  }
+
+  .daily__finale .daily__amount {
+    font-size: 16px;
+  }
+
+  .daily__track {
+    gap: 6px;
+    margin-top: 10px;
+  }
+
+  .daily__track-label {
+    font-size: 13px;
+  }
+
+  .daily__bar {
+    height: 16px;
+  }
+
+  .daily__goal {
+    font-size: 14px;
+  }
+
+  .daily__goal .res-icon {
+    width: 22px;
+    height: 22px;
+  }
+
+  .daily__claim {
+    width: 100%;
+    height: 42px;
+    font-size: 16px;
+  }
+}

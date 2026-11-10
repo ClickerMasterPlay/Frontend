@@ -68,10 +68,16 @@ type WalletContextValue = {
   toggleActive: (productId: string) => void;
   applyClickResult: (result: ClickBatchResult) => void;
   rewardMineLocal: (credits: number, resourceCode: string, amount: number) => void;
+  /** Replace resource balances with the server map. Does not touch credits or quests. */
+  replaceResources: (resources: Record<string, number>) => void;
   rewardClick: (amount: number) => void;
   advanceStone: () => void;
   claimQuest: (index: number) => void;
   stoneIndex: number;
+  /** Spend stones, or diamonds when stones are short. Local only. */
+  buyPlot: (stonePrice: number, diamondPrice: number) => "stone" | "diamond" | "poor";
+  /** Offline house income. Ignored while the server owns the stone balance. */
+  grantLocalStones: (amount: number) => void;
 };
 
 const WalletContext = createContext<WalletContextValue | null>(null);
@@ -420,6 +426,9 @@ export function WalletProvider({ children }: { children: ReactNode }) {
           blocksBroken: current.blocksBroken + 1,
         }));
       },
+      replaceResources: (resources) => {
+        setWallet((current) => ({ ...current, resources }));
+      },
       rewardMineLocal: (credits, resourceCode, amount) => {
         setWallet((current) => ({
           ...current,
@@ -623,6 +632,55 @@ export function WalletProvider({ children }: { children: ReactNode }) {
           return;
         }
         applyLocalClaim();
+      },
+      buyPlot: (stonePrice, diamondPrice) => {
+        if (stonePrice <= 0) {
+          return "stone";
+        }
+        if (wallet.coins >= stonePrice) {
+          setWallet((current) => {
+            if (current.coins < stonePrice) {
+              return current;
+            }
+            return {
+              ...current,
+              coins: addStones(current.coins, -stonePrice),
+              quest: {
+                ...current.quest,
+                spent: addStones(current.quest.spent, stonePrice),
+              },
+            };
+          });
+          return "stone";
+        }
+        const diamonds = wallet.resources.diamond ?? 0;
+        if (diamondPrice > 0 && diamonds >= diamondPrice) {
+          setWallet((current) => {
+            const have = current.resources.diamond ?? 0;
+            if (have < diamondPrice) {
+              return current;
+            }
+            return {
+              ...current,
+              resources: { ...current.resources, diamond: have - diamondPrice },
+            };
+          });
+          return "diamond";
+        }
+        return "poor";
+      },
+      grantLocalStones: (amount) => {
+        if (online || !(amount > 0)) {
+          return;
+        }
+        setWallet((current) => ({
+          ...current,
+          coins: addStones(current.coins, amount),
+          quest: {
+            ...current.quest,
+            earned: addStones(current.quest.earned, amount),
+          },
+        }));
       },
     }),
     [challenges, online, serverClickPower, session, wallet],

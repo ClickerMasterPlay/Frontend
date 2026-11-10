@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { McButton } from "../components/McButton";
+import { ResourceIcon } from "../components/ResourceIcon";
 import { formatStones } from "../game/levels";
 import { useSession } from "../session/SessionContext";
 import { useSettings } from "../settings/SettingsContext";
@@ -51,7 +52,10 @@ export function ProfileScreen({ onBack, onLogout }: ProfileScreenProps) {
               </li>
               <li>
                 <span>{t("statStones")}</span>
-                <span>{formatStones(stones, settings.language === "ru")}</span>
+                <span className="res-inline">
+                  <ResourceIcon kind="stone" size={26} />
+                  {formatStones(stones, settings.language === "ru")}
+                </span>
               </li>
               <li>
                 <span>{t("statClickPower")}</span>

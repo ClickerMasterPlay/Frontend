@@ -81,6 +81,7 @@
 }
 
 .game__top {
+  --hud-h: 52px;
   grid-area: top;
   position: relative;
   z-index: 5;
@@ -91,15 +92,26 @@
   min-width: 0;
 }
 
+.game .gear-btn,
+.game__calendar,
+.game__map {
+  width: var(--hud-h);
+  height: var(--hud-h);
+}
+
 .game__link {
+  display: flex;
+  align-items: center;
+  height: var(--hud-h);
   margin: 0;
-  padding: 8px 12px;
+  padding: 0 12px;
   border: 3px solid var(--edge);
   border-radius: 10px;
   background: rgba(12, 22, 16, 0.55);
   color: #e7f0dc;
   font-size: 14px;
   font-weight: 800;
+  line-height: 1.1;
   white-space: nowrap;
   box-shadow: 3px 3px 0 var(--edge);
 }
@@ -108,32 +120,88 @@
   color: #b7e3a4;
 }
 
+.game__hud-end {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: auto;
+}
+
+.game__calendar,
+.game__map {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  padding: 0;
+  border: 3px solid var(--edge);
+  border-radius: 10px;
+  background: var(--paper);
+  color: var(--ink);
+  box-shadow: 3px 3px 0 var(--edge);
+  cursor: pointer;
+}
+
+.game__map--on {
+  background: var(--gold-hi);
+}
+
+.game__calendar:hover:not(:disabled),
+.game__map:hover {
+  filter: brightness(1.04);
+}
+
+.game__calendar:focus-visible,
+.game__map:focus-visible {
+  outline: 2px solid #fff3c4;
+  outline-offset: 2px;
+}
+
+.game__calendar:disabled {
+  cursor: default;
+}
+
+.game__calendar-badge {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  min-width: 22px;
+  height: 22px;
+  padding: 0 5px;
+  border: 2px solid var(--edge);
+  border-radius: 999px;
+  background: var(--gold);
+  color: var(--ink);
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 18px;
+  text-align: center;
+  box-shadow: 2px 2px 0 var(--edge);
+}
+
 .game__coins {
   display: flex;
   align-items: center;
   gap: 8px;
+  height: var(--hud-h);
   min-width: 0;
   max-width: 100%;
-  margin: 0 0 0 auto;
-  padding: 10px 14px;
+  margin: 0;
+  padding: 0 14px;
   border: 3px solid var(--edge);
   border-radius: 10px;
   background: var(--paper);
   color: var(--ink);
   font-size: clamp(14px, 2.4vw, 18px);
   font-weight: 800;
+  line-height: 1;
   box-shadow: 3px 3px 0 var(--edge);
 }
 
-.game__stone-icon {
-  width: 20px;
-  height: 20px;
-  border: 2px solid #4a3a32;
-  border-radius: 5px;
-  background:
-    radial-gradient(circle at 30% 30%, #d2c8ba, transparent 45%),
-    linear-gradient(145deg, #a89f93, #6f675e);
-  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.2);
+.game__coins .res-icon {
+  width: 30px;
+  height: 30px;
 }
 
 .game__rail {
@@ -291,6 +359,10 @@
   pointer-events: none;
 }
 
+.game__mine--off {
+  display: none;
+}
+
 .game__rating-list,
 .game__quest-list {
   margin: 0;
@@ -420,18 +492,17 @@
       max(8px, env(safe-area-inset-left));
   }
 
-  .game .gear-btn {
-    width: 44px;
-    height: 44px;
+  .game__top {
+    --hud-h: 44px;
   }
 
   .game__link {
-    padding: 6px 8px;
+    padding: 0 8px;
     font-size: 12px;
   }
 
   .game__coins {
-    padding: 6px 10px;
+    padding: 0 10px;
   }
 
   .game__rail {
@@ -507,19 +578,23 @@
     gap: 4px;
   }
 
-  .game .gear-btn {
-    width: 40px;
-    height: 40px;
+  .game__top {
+    --hud-h: 40px;
   }
 
   .game__link {
-    padding: 4px 6px;
+    padding: 0 6px;
     font-size: 11px;
   }
 
   .game__coins {
-    padding: 4px 8px;
+    padding: 0 8px;
     font-size: 12px;
+  }
+
+  .game__coins .res-icon {
+    width: 24px;
+    height: 24px;
   }
 
   .game__tab {

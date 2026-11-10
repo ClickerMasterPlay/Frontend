@@ -16,6 +16,8 @@ import type {
   MachineCollectionResult,
   MachineStateResult,
   ProductType,
+  DailyRewardClaim,
+  DailyRewardStatus,
   ProgressPayload,
   PurchaseResult,
   ToolEquipmentResult,
@@ -365,6 +367,46 @@ export async function fetchLeaderboard(
     top: topList,
     me,
     totalPlayers: readNumber(raw.totalPlayers, topList.length),
+  };
+}
+
+function parseCycleDay(value: unknown): number {
+  const day = Math.round(readNumber(value, 1));
+  if (day < 1) {
+    return 1;
+  }
+  if (day > 7) {
+    return 7;
+  }
+  return day;
+}
+
+export async function fetchDailyRewardStatus(userId: string): Promise<DailyRewardStatus> {
+  const raw = await api<RawAuth>("/api/v1/daily-rewards/status", { userId });
+  return {
+    available: raw.available === true,
+    cycleDay: parseCycleDay(raw.cycleDay),
+    reward: readResources(raw.reward),
+    serverDate: typeof raw.serverDate === "string" ? raw.serverDate : "",
+    nextResetAt: typeof raw.nextResetAt === "string" ? raw.nextResetAt : "",
+  };
+}
+
+export async function claimDailyReward(
+  userId: string,
+  idempotencyKey: string,
+): Promise<DailyRewardClaim> {
+  const raw = await api<RawAuth>("/api/v1/daily-rewards/claim", {
+    method: "POST",
+    userId,
+    idempotencyKey,
+  });
+  return {
+    cycleDay: parseCycleDay(raw.cycleDay),
+    grantedResources: readResources(raw.grantedResources),
+    resources: readResources(raw.resources),
+    nextCycleDay: parseCycleDay(raw.nextCycleDay),
+    nextAvailableAt: typeof raw.nextAvailableAt === "string" ? raw.nextAvailableAt : "",
   };
 }
 

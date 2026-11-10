@@ -1,4 +1,5 @@
 import { PixelIcon } from "../components/PixelIcon";
+import { ResourceIcon } from "../components/ResourceIcon";
 import { McButton } from "../components/McButton";
 import { formatStones } from "../game/levels";
 import {
@@ -55,11 +56,6 @@ export function ShopBoard() {
             !ownedPickaxe && price !== null
               ? effectText(id, level + 1, comma, t("shopCoeff"), t("shopToClick"), t("shopPerHour"))
               : null;
-          const statusLabel = ownedPickaxe
-            ? t("shopOwned")
-            : price === null
-              ? t("shopMax")
-              : `${t("shopPrice")}: ${formatPrice(price)} ${t("stonesShort")}`;
           const buttonLabel = ownedPickaxe
             ? t("shopOwned")
             : price === null
@@ -107,7 +103,16 @@ export function ShopBoard() {
               </div>
               <div className="shop__buy">
                 <p className={ownedPickaxe ? "shop__price shop__price--owned" : "shop__price"}>
-                  {statusLabel}
+                  {ownedPickaxe ? (
+                    t("shopOwned")
+                  ) : price === null ? (
+                    t("shopMax")
+                  ) : (
+                    <span className="res-inline">
+                      {t("shopPrice")}: {formatPrice(price)}
+                      <ResourceIcon kind="stone" size={22} />
+                    </span>
+                  )}
                 </p>
                 <McButton
                   slim

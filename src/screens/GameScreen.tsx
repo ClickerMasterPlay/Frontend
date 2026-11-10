@@ -1,9 +1,13 @@
 import { useEffect, useState, type ReactNode } from "react";
 import { GearButton } from "../components/GearButton";
+import { ResourceIcon } from "../components/ResourceIcon";
+import { settleCityIncome } from "../game/cityMap";
 import { biomeFor, formatStones, levelNumber } from "../game/levels";
 import { useSession } from "../session/SessionContext";
 import { useSettings } from "../settings/SettingsContext";
 import { useWallet } from "../wallet/WalletContext";
+import { CityMap } from "./CityMap";
+import { DailyRewardControl } from "./DailyReward";
 import { QuestBoard } from "./QuestBoard";
 import { InventoryPanel } from "./InventoryPanel";
 import { MineField } from "./MineField";
@@ -65,10 +69,23 @@ function RailTab({
 
 export function GameScreen({ onSettings, onProfile }: GameScreenProps) {
   const { t, settings } = useSettings();
-  const { stones, stoneIndex } = useWallet();
+  const { stones, stoneIndex, resources, buyPlot, grantLocalStones } = useWallet();
   const { status } = useSession();
   const [tab, setTab] = useState<GameTab | null>(tabFromHash);
   const [hintOn, setHintOn] = useState(settings.hints);
+  const [mapOpen, setMapOpen] = useState(false);
+
+  useEffect(() => {
+    const tick = () => {
+      const gained = settleCityIncome(Date.now());
+      if (gained > 0) {
+        grantLocalStones(gained);
+      }
+    };
+    tick();
+    const timer = window.setInterval(tick, 4000);
+    return () => window.clearInterval(timer);
+  }, [grantLocalStones]);
 
   useEffect(() => {
     if (!settings.hints) {
@@ -106,12 +123,32 @@ export function GameScreen({ onSettings, onProfile }: GameScreenProps) {
               : t("serverOffline")}
         </p>
         <p className="game__link">{t("level")} {levelNumber(stoneIndex)}</p>
-        <p className="game__coins">
-          <span className="game__stone-icon" aria-hidden="true" />
-          <span>
-            {t("stones")} · {formatStones(stones, settings.language === "ru")}
-          </span>
-        </p>
+        <div className="game__hud-end">
+          <button
+            type="button"
+            className={mapOpen ? "game__map game__map--on" : "game__map"}
+            aria-pressed={mapOpen}
+            aria-label={t("map")}
+            title={t("map")}
+            onClick={() => setMapOpen((open) => !open)}
+          >
+            <svg viewBox="0 0 16 16" width="20" height="20" aria-hidden="true">
+              <path
+                d="M1.2 3.4 5.4 2l5 2 4.4-1.4V12.6L10.4 14l-5-2-4.2 1.4V3.4z"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.4"
+                strokeLinejoin="round"
+              />
+              <path d="M5.4 2v10M10.4 4v10" fill="none" stroke="currentColor" strokeWidth="1.2" />
+            </svg>
+          </button>
+          <DailyRewardControl />
+          <p className="game__coins">
+            <ResourceIcon kind="stone" size={34} />
+            <span>{formatStones(stones, settings.language === "ru")}</span>
+          </p>
+        </div>
       </div>
 
       <div className="game__rail" role="tablist" aria-label={t("sections")}>
@@ -164,10 +201,21 @@ export function GameScreen({ onSettings, onProfile }: GameScreenProps) {
       ) : null}
 
       <main className="game__field">
-        {hintOn ? <p className="game__hint">{t("hintGame")}</p> : null}
-        <div className="game__mine">
+        {hintOn && !mapOpen ? <p className="game__hint">{t("hintGame")}</p> : null}
+        <div className={mapOpen ? "game__mine game__mine--off" : "game__mine"}>
           <MineField />
         </div>
+        {mapOpen ? (
+          <div className="game__mine">
+            <CityMap
+              stoneIndex={stoneIndex}
+              stones={stones}
+              diamonds={resources.diamond ?? 0}
+              onBuy={buyPlot}
+              onClose={() => setMapOpen(false)}
+            />
+          </div>
+        ) : null}
       </main>
       </div>
 
