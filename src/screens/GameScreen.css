@@ -143,10 +143,6 @@
   cursor: pointer;
 }
 
-.game__map--on {
-  background: var(--gold-hi);
-}
-
 .game__calendar:hover:not(:disabled),
 .game__map:hover {
   filter: brightness(1.04);
@@ -679,4 +675,47 @@
   .game__tab {
     height: 48px;
   }
+}
+
+.title-screen.game.game--map {
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: auto minmax(0, 1fr);
+  grid-template-areas:
+    "top"
+    "play";
+  background:
+    radial-gradient(ellipse 120% 55% at 50% 100%, rgba(255, 252, 246, 0.45), transparent 62%),
+    linear-gradient(180deg, #5aaee8 0%, #8dcef4 42%, #d7f2ff 100%);
+}
+
+.game--map .game__rail,
+.game--map .game__bottom {
+  display: none;
+}
+
+.game--map .game__bg,
+.game--map .game__dim {
+  visibility: hidden;
+}
+
+.game--map .game__top {
+  z-index: 6;
+}
+
+.game--map .game__stage {
+  position: fixed;
+  z-index: 1;
+  inset: 0;
+}
+
+.game--map .game__stage,
+.game--map .game__field,
+.game--map .game__mine {
+  width: 100%;
+  height: 100%;
+  max-width: none;
+}
+
+.game--map .game__field {
+  background: none;
 }

@@ -1,4 +1,5 @@
 .city {
+  container-type: size;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -6,26 +7,55 @@
   height: 100%;
   min-width: 0;
   min-height: 0;
-  pointer-events: none;
+  overflow: hidden;
+  touch-action: none;
+  cursor: grab;
+  pointer-events: auto;
+  user-select: none;
 }
 
-.city__frame {
+.city:active {
+  cursor: grabbing;
+}
+
+.city button {
+  touch-action: none;
+}
+
+.city__sheet {
   position: relative;
-  display: inline-block;
-  max-width: min(920px, 100%);
+  width: min(100%, calc(100cqh * 1152 / 864));
+  aspect-ratio: 1152 / 864;
   max-height: 100%;
   line-height: 0;
+  transform-origin: center center;
   pointer-events: auto;
+}
+
+.city__source {
+  position: absolute;
+  width: 0;
+  height: 0;
+  opacity: 0;
+  pointer-events: none;
 }
 
 .city__art {
   display: block;
-  width: auto;
-  max-width: 100%;
-  height: auto;
-  max-height: min(68dvh, 100%);
-  border-radius: 16px;
+  width: 100%;
+  height: 100%;
+  border-radius: 0;
   image-rendering: auto;
+}
+
+.city__art--wait {
+  visibility: hidden;
+}
+
+.city__sheet[data-ready="0"] .city__pins,
+.city__sheet[data-ready="0"] .city__next,
+.city__sheet[data-ready="0"] .city__card {
+  visibility: hidden;
 }
 
 .city__fog,
@@ -38,6 +68,7 @@
 
 .city__fog {
   pointer-events: none;
+  image-rendering: pixelated;
 }
 
 .city__pin {
@@ -78,14 +109,14 @@
 .city__chip {
   display: inline-flex;
   align-items: center;
-  gap: 3px;
-  height: 26px;
-  padding: 0 6px;
+  gap: 4px;
+  height: clamp(28px, 4.6cqh, 38px);
+  padding: 0 8px;
   border: 2px solid var(--edge);
   border-radius: 999px;
   background: var(--paper);
   color: var(--ink);
-  font-size: 13px;
+  font-size: clamp(13px, 2.2cqh, 17px);
   font-weight: 800;
   line-height: 1;
   box-shadow: 2px 2px 0 var(--edge);
@@ -102,20 +133,21 @@
 
 .city__next {
   position: absolute;
-  top: 8px;
+  top: 12px;
   left: 50%;
-  z-index: 4;
-  max-width: calc(100% - 16px);
+  z-index: 7;
+  max-width: calc(100% - 24px);
   margin: 0;
-  padding: 6px 10px;
+  padding: 8px 14px;
   border: 3px solid var(--edge);
   border-radius: 10px;
   background: var(--paper);
   color: var(--ink);
-  font-size: 13px;
+  font-size: clamp(12px, 1.7cqw, 18px);
   font-weight: 800;
   line-height: 1.25;
   text-align: center;
+  white-space: nowrap;
   box-shadow: 3px 3px 0 var(--edge);
   transform: translateX(-50%);
   pointer-events: none;
@@ -124,8 +156,8 @@
 .city__card {
   position: absolute;
   left: 50%;
-  bottom: 10px;
-  z-index: 6;
+  bottom: 12px;
+  z-index: 8;
   width: min(280px, calc(100% - 16px));
   margin: 0;
   padding: 10px 12px;
@@ -232,16 +264,13 @@
 }
 
 @media (max-width: 800px) {
-  .city__art {
-    max-height: min(52dvh, 100%);
-  }
-
   .city__next {
-    font-size: 12px;
+    top: 8px;
+    padding: 6px 10px;
   }
 
   .city__card {
-    bottom: 6px;
+    bottom: 8px;
     padding: 8px 10px;
   }
 }

@@ -100,7 +100,7 @@ export function GameScreen({ onSettings, onProfile }: GameScreenProps) {
   };
 
   return (
-    <div className={`title-screen game game--${biomeFor(stoneIndex)}${tab ? " game--open" : ""}`}>
+    <div className={`title-screen game game--${biomeFor(stoneIndex)}${mapOpen ? " game--map" : tab ? " game--open" : ""}`}>
       <div className="game__bg" />
       <div className="game__dim" />
       {tab ? (
@@ -126,22 +126,34 @@ export function GameScreen({ onSettings, onProfile }: GameScreenProps) {
         <div className="game__hud-end">
           <button
             type="button"
-            className={mapOpen ? "game__map game__map--on" : "game__map"}
+            className="game__map"
             aria-pressed={mapOpen}
-            aria-label={t("map")}
-            title={t("map")}
-            onClick={() => setMapOpen((open) => !open)}
+            aria-label={mapOpen ? t("close") : t("map")}
+            title={mapOpen ? t("close") : t("map")}
+            onClick={() => {
+              setMapOpen((open) => !open);
+              setTab(null);
+            }}
           >
-            <svg viewBox="0 0 16 16" width="20" height="20" aria-hidden="true">
-              <path
-                d="M1.2 3.4 5.4 2l5 2 4.4-1.4V12.6L10.4 14l-5-2-4.2 1.4V3.4z"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.4"
-                strokeLinejoin="round"
-              />
-              <path d="M5.4 2v10M10.4 4v10" fill="none" stroke="currentColor" strokeWidth="1.2" />
-            </svg>
+            {mapOpen ? (
+              <svg viewBox="0 0 16 16" width="18" height="18" aria-hidden="true">
+                <path
+                  fill="currentColor"
+                  d="M3.1 4.3 4.3 3.1 8 6.8 11.7 3.1 12.9 4.3 9.2 8 12.9 11.7 11.7 12.9 8 9.2 4.3 12.9 3.1 11.7 6.8 8 3.1 4.3z"
+                />
+              </svg>
+            ) : (
+              <svg viewBox="0 0 16 16" width="20" height="20" aria-hidden="true">
+                <path
+                  d="M1.2 3.4 5.4 2l5 2 4.4-1.4V12.6L10.4 14l-5-2-4.2 1.4V3.4z"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.4"
+                  strokeLinejoin="round"
+                />
+                <path d="M5.4 2v10M10.4 4v10" fill="none" stroke="currentColor" strokeWidth="1.2" />
+              </svg>
+            )}
           </button>
           <DailyRewardControl />
           <p className="game__coins">
@@ -187,7 +199,7 @@ export function GameScreen({ onSettings, onProfile }: GameScreenProps) {
       </div>
 
       <div className="game__stage">
-      {tab ? (
+      {tab && !mapOpen ? (
         <section className="game__panel" role="tabpanel">
           <div className="game__panel-body">
             {tab === "shop" ? <ShopBoard /> : null}
