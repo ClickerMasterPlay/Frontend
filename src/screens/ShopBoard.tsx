@@ -12,6 +12,7 @@ import {
   upgradeTitleKey,
   type UpgradeId,
 } from "../game/upgrades";
+import type { MessageKey } from "../i18n/strings";
 import { useSettings } from "../settings/SettingsContext";
 import { useWallet } from "../wallet/WalletContext";
 import "./ShopModal.css";
@@ -29,7 +30,7 @@ function effectText(
     return `+${value} ${toClick}`;
   }
   if (id === "auto") {
-    return `+${value} ${perHour}`;
+    return perHour;
   }
   return `${coeff} ×${value}`;
 }
@@ -38,6 +39,8 @@ export function ShopBoard() {
   const { t, settings } = useSettings();
   const { stones, upgrades, buyUpgrade } = useWallet();
   const comma = settings.language === "ru";
+  const autoNow: MessageKey[] = ["shopAutoNow1", "shopAutoNow2", "shopAutoNow3"];
+  const autoAfter: MessageKey[] = ["shopAutoAfter2", "shopAutoAfter3"];
 
   return (
     <div className="shop shop--panel">
@@ -49,11 +52,11 @@ export function ShopBoard() {
           const pickaxe = isPickaxe(id);
           const ownedPickaxe = pickaxe && level > 0;
           const current =
-            level > 0
+            id !== "auto" && level > 0
               ? effectText(id, level, comma, t("shopCoeff"), t("shopToClick"), t("shopPerHour"))
               : null;
           const upcoming =
-            !ownedPickaxe && price !== null
+            id !== "auto" && !ownedPickaxe && price !== null
               ? effectText(id, level + 1, comma, t("shopCoeff"), t("shopToClick"), t("shopPerHour"))
               : null;
           const buttonLabel = ownedPickaxe
@@ -87,18 +90,33 @@ export function ShopBoard() {
                       ))}
                     </p>
                   ) : null}
-                  {current ? (
-                    <p className="shop__effect">
-                      {pickaxe ? current : `${t("shopNow")}: ${current}`}
-                    </p>
-                  ) : upcoming && level === 0 ? (
-                    <p className="shop__effect">{upcoming}</p>
-                  ) : null}
-                  {upcoming && level > 0 ? (
-                    <p className="shop__effect">
-                      {t("shopNext")}: {upcoming}
-                    </p>
-                  ) : null}
+                  {id === "auto" ? (
+                    level === 0 ? (
+                      <p className="shop__effect">{t("shopAutoBuy")}</p>
+                    ) : (
+                      <>
+                        <p className="shop__effect">{t(autoNow[level - 1])}</p>
+                        {level < autoNow.length ? (
+                          <p className="shop__effect">{t(autoAfter[level - 1])}</p>
+                        ) : null}
+                      </>
+                    )
+                  ) : (
+                    <>
+                      {current ? (
+                        <p className="shop__effect">
+                          {pickaxe ? current : `${t("shopNow")}: ${current}`}
+                        </p>
+                      ) : upcoming && level === 0 ? (
+                        <p className="shop__effect">{upcoming}</p>
+                      ) : null}
+                      {upcoming && level > 0 ? (
+                        <p className="shop__effect">
+                          {t("shopNext")}: {upcoming}
+                        </p>
+                      ) : null}
+                    </>
+                  )}
                 </div>
               </div>
               <div className="shop__buy">

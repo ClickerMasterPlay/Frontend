@@ -97,6 +97,24 @@
   gap: 8px;
 }
 
+.profile__switch {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--ink);
+  font: inherit;
+  font-size: 14px;
+  text-align: center;
+  cursor: pointer;
+}
+
+.profile__switch span {
+  color: #6a3e12;
+  font-weight: 800;
+  text-decoration: underline;
+}
+
 .profile__logout {
   display: flex;
   justify-content: center;

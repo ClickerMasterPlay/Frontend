@@ -391,6 +391,78 @@
   color: var(--gold-2);
 }
 
+.game__rating-switch {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.game__rating-switch button,
+.game__friend-form button,
+.game__friend-pending button {
+  border: 3px solid var(--edge);
+  border-radius: 8px;
+  background: var(--paper-2);
+  color: var(--ink);
+  font: inherit;
+  font-weight: 800;
+  padding: 6px 12px;
+  cursor: pointer;
+}
+
+.game__rating-switch button.is-on {
+  background: var(--gold);
+  color: #3a2a10;
+}
+
+.game__friend-form {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.game__friend-form input {
+  flex: 1;
+  min-width: 0;
+  border: 3px solid var(--edge);
+  border-radius: 8px;
+  background: var(--paper);
+  color: var(--ink);
+  font: inherit;
+  padding: 6px 10px;
+}
+
+.game__friend-pending {
+  margin: 0 0 10px;
+  padding: 0;
+  list-style: none;
+}
+
+.game__friend-pending li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 8px;
+  padding: 8px 10px;
+  border: 3px solid var(--edge);
+  border-radius: 8px;
+  background: var(--paper-2);
+  color: var(--ink);
+  font-weight: 800;
+}
+
+.game__friend-pending button.friend-accept {
+  background: var(--btn);
+  color: var(--btn-ink);
+}
+
+.game__friend-error {
+  margin: 0 0 8px;
+  color: #8a3b2a;
+  font-size: 13px;
+}
+
 .quest-row {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;

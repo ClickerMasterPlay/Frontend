@@ -25,15 +25,26 @@ export function ResourceStub() {
           }
           const upgrade = isUpgradeId(productId) ? productId : null;
           const label = upgrade ? t(upgradeTitleKey(upgrade)) : productId;
-          const on = active.includes(productId);
+          const locked = upgrade === "click";
+          const on = locked || active.includes(productId);
           return (
             <button
               key={productId}
               type="button"
               className={on ? "res-stub__slot res-stub__slot--on" : "res-stub__slot"}
-              title={on ? `${label} · ${t("activeOn")}` : `${label} · ${t("activeOff")}`}
+              title={
+                locked
+                  ? `${label} · ${t("clickLocked")}`
+                  : on
+                    ? `${label} · ${t("activeOn")}`
+                    : `${label} · ${t("activeOff")}`
+              }
               aria-pressed={on}
-              onClick={() => toggleActive(productId)}
+              onClick={() => {
+                if (!locked) {
+                  toggleActive(productId);
+                }
+              }}
             >
               {upgrade ? <PixelIcon kind={upgrade} /> : <span>{productId.slice(0, 2)}</span>}
             </button>

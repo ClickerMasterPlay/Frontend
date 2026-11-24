@@ -99,10 +99,11 @@ function applyInventory(
         ? clickLevelFromPower(clickPower)
         : current.upgrades.click,
   };
-  // Keep only click upgrade from local active; pickaxes/machines come from inventory.
-  const nextActive = new Set<string>(
-    current.active.filter((id) => id === "click"),
-  );
+  // Click power has no server off-switch, so a bought upgrade stays on.
+  const nextActive = new Set<string>();
+  if (upgrades.click > 0) {
+    nextActive.add("click");
+  }
   let equippedToolCode: string | null = null;
 
   for (const tool of inventory.tools) {
@@ -152,6 +153,18 @@ export function WalletProvider({ children }: { children: ReactNode }) {
       saveWallet(wallet);
     }
   }, [ready, wallet]);
+
+  useEffect(() => {
+    if (!ready || wallet.upgrades.click < 1 || wallet.active.includes("click")) {
+      return;
+    }
+    setWallet((current) => {
+      if (current.upgrades.click < 1 || current.active.includes("click")) {
+        return current;
+      }
+      return { ...current, active: [...current.active, "click"] };
+    });
+  }, [ready, wallet.upgrades.click, wallet.active]);
 
   useEffect(() => {
     // Offline-only local broom. Online auto comes from machines/collect.
@@ -219,7 +232,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
               ...current,
               coins: progress.credits,
               resources: progress.resources,
-              blocksBroken: Math.max(current.blocksBroken, challengeList.stats.blocksBroken),
+              blocksBroken: challengeList.stats.blocksBroken,
               quest: {
                 ...current.quest,
                 clicks: Math.max(current.quest.clicks, challengeList.stats.clicks),
@@ -257,8 +270,8 @@ export function WalletProvider({ children }: { children: ReactNode }) {
         .then((result) => {
           setWallet((current) => ({
             ...current,
-            // Never snap credits down on an empty/stale collect; only move forward.
-            coins: Math.max(current.coins, result.balance.credits),
+            // Server credits are the same number the leaderboard shows.
+            coins: result.balance.credits,
             resources: result.balance.resources,
           }));
         })
@@ -289,6 +302,9 @@ export function WalletProvider({ children }: { children: ReactNode }) {
           return;
         }
         const id = productId as UpgradeId;
+        if (id === "click") {
+          return;
+        }
         const on = wallet.active.includes(id);
 
         const applyLocalToggle = () => {
@@ -388,11 +404,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
       applyClickResult: (result) => {
         setWallet((current) => ({
           ...current,
-          // Apply this batch's click rewards, and never snap below the server balance.
-          coins: Math.max(
-            addStones(current.coins, result.rewards.credits),
-            result.balance.credits,
-          ),
+          coins: result.balance.credits,
           resources: result.balance.resources,
         }));
       },
@@ -463,10 +475,6 @@ export function WalletProvider({ children }: { children: ReactNode }) {
                 await installMachine(session.userId, product.productId);
                 inventory = await fetchInventory(session.userId);
               }
-              if (isPickaxe(id)) {
-                await equipTool(session.userId, product.productId);
-                inventory = await fetchInventory(session.userId);
-              }
               setServerClickPower(Math.max(0.1, purchased.clickPower || 1));
               setWallet((current) =>
                 applyInventory(
@@ -497,10 +505,6 @@ export function WalletProvider({ children }: { children: ReactNode }) {
                   let inventory = await fetchInventory(session.userId);
                   if (id === "auto") {
                     await installMachine(session.userId, product.productId).catch(() => undefined);
-                    inventory = await fetchInventory(session.userId);
-                  }
-                  if (isPickaxe(id)) {
-                    await equipTool(session.userId, product.productId).catch(() => undefined);
                     inventory = await fetchInventory(session.userId);
                   }
                   const progress = await fetchProgress(session.userId);

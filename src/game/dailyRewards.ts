@@ -79,6 +79,14 @@ function writeStreaks(rows: Record<string, StreakRow>) {
 }
 
 /** Claims already collected in the current 30-day track. A missed day does not clear it. */
+export function claimedOnDate(userId: string, serverDate: string): boolean {
+  if (!serverDate) {
+    return false;
+  }
+  const row = readStreaks()[userId];
+  return Boolean(row && row.lastDate === serverDate);
+}
+
 export function streakCount(userId: string): number {
   const row = readStreaks()[userId];
   if (!row || typeof row.count !== "number" || row.count < 0) {

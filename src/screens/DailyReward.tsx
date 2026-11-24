@@ -5,6 +5,7 @@ import type { DailyRewardStatus } from "../api/types";
 import { ResourceIcon } from "../components/ResourceIcon";
 import {
   claimKey,
+  claimedOnDate,
   clearClaimKey,
   noteDailyClaim,
   resetClock,
@@ -36,8 +37,8 @@ function dayMark(day: number, cycleDay: number, available: boolean): "done" | "t
   if (day < cycleDay) {
     return "done";
   }
-  if (day === cycleDay) {
-    return available ? "today" : "done";
+  if (available && day === cycleDay) {
+    return "today";
   }
   return "";
 }
@@ -199,9 +200,10 @@ export function DailyRewardControl() {
         if (cancelled) {
           return;
         }
+        const alreadyClaimed = claimedOnDate(session.userId, next.serverDate);
         setClaimedDays(streakCount(session.userId));
-        setReward(next);
-        if (next.available && !prompted.current) {
+        setReward(alreadyClaimed ? { ...next, available: false } : next);
+        if (next.available && !alreadyClaimed && !prompted.current) {
           prompted.current = true;
           setOpen(true);
         }
@@ -231,8 +233,18 @@ export function DailyRewardControl() {
         replaceResources(result.resources);
         noteDailyClaim(userId, serverDate);
         clearClaimKey(userId);
+        prompted.current = true;
         setClaimedDays(streakCount(userId));
-        setReward((current) => (current ? { ...current, available: false } : current));
+        setReward((current) =>
+          current
+            ? {
+                ...current,
+                available: false,
+                cycleDay: result.nextCycleDay || current.cycleDay,
+                nextResetAt: result.nextAvailableAt || current.nextResetAt,
+              }
+            : current,
+        );
         setOpen(false);
       })
       .catch((err: unknown) => {
@@ -245,8 +257,8 @@ export function DailyRewardControl() {
           void fetchDailyRewardStatus(userId)
             .then((next) => {
               setClaimedDays(streakCount(userId));
-              setReward(next);
-              setOpen(next.available);
+              setReward({ ...next, available: false });
+              setOpen(false);
             })
             .catch(() => setOpen(false));
           return;

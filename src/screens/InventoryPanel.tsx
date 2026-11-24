@@ -57,18 +57,24 @@ export function InventoryPanel({
               />
             );
           }
-          const label = slot.on ? `${slot.label} · ${t("activeOn")}` : `${slot.label} · ${t("activeOff")}`;
-          const selected = picked === index || (interactive && slot.on);
+          const locked = slot.upgrade === "click";
+          const on = locked || slot.on;
+          const label = locked
+            ? `${slot.label} · ${t("clickLocked")}`
+            : on
+              ? `${slot.label} · ${t("activeOn")}`
+              : `${slot.label} · ${t("activeOff")}`;
+          const selected = picked === index || (interactive && on);
           return (
             <button
               key={slot.code}
               type="button"
               className={selected ? "inv-panel__slot inv-panel__slot--on" : "inv-panel__slot"}
               title={label}
-              aria-pressed={interactive ? slot.on : undefined}
+              aria-pressed={interactive ? on : undefined}
               onClick={() => {
                 setPicked(index);
-                if (interactive && slot.upgrade) {
+                if (interactive && slot.upgrade && !locked) {
                   toggleActive(slot.code);
                 }
               }}

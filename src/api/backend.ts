@@ -11,6 +11,8 @@ import type {
   InventoryMachine,
   InventoryPayload,
   InventoryTool,
+  FriendLeaderboardPayload,
+  FriendPayload,
   LeaderboardEntry,
   LeaderboardPayload,
   MachineCollectionResult,
@@ -345,7 +347,7 @@ function parseLeaderboardEntry(value: unknown): LeaderboardEntry | null {
     userId,
     displayName: typeof raw.displayName === "string" ? raw.displayName : null,
     score: readNumber(raw.score),
-    credits: readNumber(raw.credits),
+    credits: typeof raw.credits === "number" ? raw.credits : readNumber(raw.score),
     totalResourcesValue: readNumber(raw.totalResourcesValue),
     clickPower: readNumber(raw.clickPower, 1),
   };
@@ -407,6 +409,77 @@ export async function claimDailyReward(
     resources: readResources(raw.resources),
     nextCycleDay: parseCycleDay(raw.nextCycleDay),
     nextAvailableAt: typeof raw.nextAvailableAt === "string" ? raw.nextAvailableAt : "",
+  };
+}
+
+function parseFriend(value: unknown): FriendPayload | null {
+  const raw = asRecord(value);
+  if (typeof raw.id !== "string" || typeof raw.userId !== "string" || typeof raw.friendId !== "string") {
+    return null;
+  }
+  return {
+    id: raw.id,
+    userId: raw.userId,
+    friendId: raw.friendId,
+    status: typeof raw.status === "string" ? raw.status : "",
+    displayName: typeof raw.displayName === "string" ? raw.displayName : null,
+    email: typeof raw.email === "string" ? raw.email : null,
+    score: readNumber(raw.score),
+    rank: typeof raw.rank === "number" ? Math.floor(raw.rank) : null,
+  };
+}
+
+function parseFriendList(value: unknown): FriendPayload[] {
+  const list = Array.isArray(value) ? value : [];
+  return list.flatMap((item) => {
+    const friend = parseFriend(item);
+    return friend ? [friend] : [];
+  });
+}
+
+export async function inviteFriend(userId: string, email: string): Promise<FriendPayload> {
+  const raw = await api<RawAuth>(
+    `/api/v1/friends/invite?email=${encodeURIComponent(email)}`,
+    { method: "POST", userId },
+  );
+  const friend = parseFriend(raw);
+  if (!friend) {
+    throw new Error("Invalid friend invite response");
+  }
+  return friend;
+}
+
+export async function acceptFriend(userId: string, inviterId: string): Promise<FriendPayload> {
+  const raw = await api<RawAuth>(`/api/v1/friends/${inviterId}/accept`, {
+    method: "POST",
+    userId,
+  });
+  const friend = parseFriend(raw);
+  if (!friend) {
+    throw new Error("Invalid friend accept response");
+  }
+  return friend;
+}
+
+export async function fetchFriends(userId: string): Promise<FriendPayload[]> {
+  return parseFriendList(await api<unknown>("/api/v1/friends", { userId }));
+}
+
+export async function fetchPendingFriends(userId: string): Promise<FriendPayload[]> {
+  return parseFriendList(await api<unknown>("/api/v1/friends/pending", { userId }));
+}
+
+export async function fetchFriendLeaderboard(userId: string): Promise<FriendLeaderboardPayload> {
+  const raw = await api<RawAuth>("/api/v1/friends/leaderboard", { userId });
+  const topList = (Array.isArray(raw.top) ? raw.top : []).flatMap((item) => {
+    const entry = parseLeaderboardEntry(item);
+    return entry ? [entry] : [];
+  });
+  return {
+    top: topList,
+    me: parseLeaderboardEntry(raw.me),
+    totalPlayers: readNumber(raw.totalPlayers, topList.length),
+    friendCount: readNumber(raw.friendCount),
   };
 }
 

@@ -157,6 +157,21 @@ export type LeaderboardPayload = {
   totalPlayers: number;
 };
 
+export type FriendPayload = {
+  id: string;
+  userId: string;
+  friendId: string;
+  status: string;
+  displayName: string | null;
+  email: string | null;
+  score: number;
+  rank: number | null;
+};
+
+export type FriendLeaderboardPayload = LeaderboardPayload & {
+  friendCount: number;
+};
+
 export const FALLBACK_CATALOG: CatalogItem[] = [
   {
     productType: "CLICK_UPGRADE",
